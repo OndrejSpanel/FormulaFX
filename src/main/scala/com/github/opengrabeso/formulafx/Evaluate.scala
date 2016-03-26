@@ -36,7 +36,7 @@ object Evaluate {
 
     def apply(input: String): Double = parseAll(command, input) match {
       case Success(result, _) => result
-      case failure : NoSuccess => scala.sys.error(failure.msg)
+      case failure : NoSuccess => 0
     }
   }
 
