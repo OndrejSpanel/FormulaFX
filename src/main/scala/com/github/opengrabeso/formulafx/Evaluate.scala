@@ -3,12 +3,17 @@ package com.github.opengrabeso.formulafx
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
+  type Number = Double
+
+  var variables = Map[String, Number]()
 
   object ExprParser extends JavaTokenParsers {
-    //def variable  : Parser[Double] = """[a-z]""".r ^^ { x => X(x) }
-    def number    : Parser[Double] = floatingPointNumber ^^ { x => x.toDouble }
-    def factor    : Parser[Double] = number | "(" ~> expr <~ ")"
-    def term      : Parser[Double] = factor ~ rep( "*" ~ factor | "/" ~ factor) ^^ {
+    def variable  : Parser[Double] = ident ^^ {
+      x => variables.getOrElse(x, 0.0)
+    }
+    def number    : Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
+    def factor    : Parser[Number] = (number | variable) | "(" ~> expr <~ ")"
+    def term      : Parser[Number] = factor ~ rep( "*" ~ factor | "/" ~ factor) ^^ {
       case number ~ list => list.foldLeft(number) {
         case (x, "*" ~ y) => x * y
         case (x, "/" ~ y) => x / y
@@ -21,7 +26,15 @@ object Evaluate {
       }
     }
 
-    def apply(input: String): Double = parseAll(expr, input) match {
+    def assign: Parser[Number] = ':' ~ ident ~ '=' ~ expr ^^ {
+      case _ ~ i ~ _ ~ x =>
+        variables += (i -> x)
+        x
+    }
+
+    def command = expr | assign ^^ {x => x}
+
+    def apply(input: String): Double = parseAll(command, input) match {
       case Success(result, _) => result
       case failure : NoSuccess => scala.sys.error(failure.msg)
     }
