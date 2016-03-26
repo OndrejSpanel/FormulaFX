@@ -26,8 +26,8 @@ object Evaluate {
       }
     }
 
-    def assign: Parser[Number] = ':' ~ ident ~ '=' ~ expr ^^ {
-      case _ ~ i ~ _ ~ x =>
+    def assign: Parser[Number] = (':' ~> ident <~ '=') ~ expr ^^ {
+      case i ~ x =>
         variables += (i -> x)
         x
     }
