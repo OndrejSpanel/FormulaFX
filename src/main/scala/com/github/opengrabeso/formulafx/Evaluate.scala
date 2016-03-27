@@ -26,13 +26,13 @@ object Evaluate {
       }
     }
 
-    def assign: Parser[Number] = (':' ~> ident <~ '=') ~ expr ^^ {
+    def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
         variables += (i -> x)
         x
     }
 
-    def command = expr | assign ^^ {x => x}
+    def command = expr ||| assign ^^ {x => x}
 
     def apply(input: String): Double = parseAll(command, input) match {
       case Success(result, _) => result
