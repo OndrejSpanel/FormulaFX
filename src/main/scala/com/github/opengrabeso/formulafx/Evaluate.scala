@@ -32,7 +32,7 @@ object Evaluate {
         x
     }
 
-    def command = expr ||| assign ^^ {x => x}
+    def command = assign | expr ^^ {x => x}
 
     def apply(input: String): Double = parseAll(command, input) match {
       case Success(result, _) => result
