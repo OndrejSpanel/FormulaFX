@@ -8,9 +8,7 @@ object Evaluate {
   var variables = Map[String, Number]()
 
   object ExprParser extends JavaTokenParsers {
-    def variable  : Parser[Double] = ident ^^ {
-      x => variables.getOrElse(x, 0.0)
-    }
+    def variable  : Parser[Number] = ident ^^ { x => variables.getOrElse(x, 0.0) }
     def number    : Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
     def factor    : Parser[Number] = (number | variable) | "(" ~> expr <~ ")"
     def term      : Parser[Number] = factor ~ rep( "*" ~ factor | "/" ~ factor) ^^ {
@@ -19,7 +17,7 @@ object Evaluate {
         case (x, "/" ~ y) => x / y
       }
     }
-    def expr  : Parser[Double] = term ~ rep("+" ~ term | "-" ~ term) ^^ {
+    def expr  : Parser[Number] = term ~ rep("+" ~ term | "-" ~ term) ^^ {
       case number ~ list => list.foldLeft(number) {
         case (x, "+" ~ y) => x + y
         case (x, "-" ~ y) => x - y
