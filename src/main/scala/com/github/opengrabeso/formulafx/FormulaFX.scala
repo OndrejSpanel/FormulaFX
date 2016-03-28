@@ -34,7 +34,7 @@ object FormulaFX extends JFXApp {
             setCellValueFactory(
               new javafx.util.Callback[CellDataFeatures[TableRow, String], ObservableValue[String]]() {
                 override def call(param: CellDataFeatures[TableRow, String]): ObservableValue[String] = {
-                  new StringProperty(param.getValue.text)
+                  param.getValue.text
                 }
               }
             )
