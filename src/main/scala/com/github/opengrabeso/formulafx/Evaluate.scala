@@ -10,25 +10,12 @@ object Evaluate {
 
   object ExprParser extends JavaTokenParsers {
     type Operator = (Number, Number) => Number
-    type Function = Number => BoxedNumber
+    type Function = Number => Number
 
-    object Functions {
-      def sin(x: BoxedNumber): BoxedNumber = Math.sin(x)
-      def cos(x: BoxedNumber): BoxedNumber = Math.sin(x)
-    }
+    def f_sin: Parser[Function] = "sin" ^^^ Math.sin
+    def f_cos: Parser[Function] = "cos" ^^^ Math.cos
 
-    import scala.reflect.runtime.universe
-
-    val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-    val module = runtimeMirror.staticModule("Functions")
-    val obj = runtimeMirror.reflectModule(module)
-
-    val functionNames = Functions.getClass.getMethods.map { f =>
-      f.getName -> { x: Number => f.invoke(Functions, x: BoxedNumber).asInstanceOf[BoxedNumber] }
-    }.toMap
-
-
-    def parseFunctionName: Parser[Function] = ident ^^ functionNames
+    def parseFunctionName: Parser[Function] = f_sin | f_cos
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x) }
 
@@ -40,7 +27,7 @@ object Evaluate {
     def variable: Parser[Number] = ident ^^ { x => variables.getOrElse(x, 0.0) }
     def fNumber: Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
-    def factor: Parser[Number] = (number | variable) | "(" ~> expr <~ ")"
+    def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
     def op_* : Parser[Operator] = "*" ^^^ { (a, b) => a * b }
     def op_/ : Parser[Operator] = "/" ^^^ { (a, b) => a / b }
