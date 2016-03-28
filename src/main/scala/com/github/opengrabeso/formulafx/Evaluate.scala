@@ -29,13 +29,9 @@ object Evaluate {
     def mulOperators: Parser[Operator] = op_* | op_/
     def addOperators: Parser[Operator] = op_+ | op_-
 
-    def term: Parser[Number] = factor ~ rep(mulOperators ~ factor) ^^ {
-      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => op(x, y) }
-    }
+    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => o(a,b) }) | factor
 
-    def expr: Parser[Number] = term ~ rep(addOperators ~ term) ^^ {
-      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => op(x, y) }
-    }
+    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => o(a,b) }) | term
 
     def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
