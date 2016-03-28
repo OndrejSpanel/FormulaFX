@@ -29,10 +29,10 @@ object Evaluate {
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
-    def op_* : Parser[Operator] = "*" ^^^ { (a, b) => a * b }
-    def op_/ : Parser[Operator] = "/" ^^^ { (a, b) => a / b }
-    def op_+ : Parser[Operator] = "+" ^^^ { (a, b) => a + b }
-    def op_- : Parser[Operator] = "-" ^^^ { (a, b) => a - b }
+    def op_* : Parser[Operator] = "*" ^^^ { _ * _ }
+    def op_/ : Parser[Operator] = "/" ^^^ { _ / _ }
+    def op_+ : Parser[Operator] = "+" ^^^ { _ + _ }
+    def op_- : Parser[Operator] = "-" ^^^ { _ - _ }
 
     def mulOperators: Parser[Operator] = op_* | op_/
     def addOperators: Parser[Operator] = op_+ | op_-
