@@ -7,7 +7,7 @@ import scalafx.collections.ObservableBuffer
 import scalafx.application.JFXApp
 import scalafx.beans.property.StringProperty
 import scalafx.scene.Scene
-import scalafx.scene.control.{TableView, TextField}
+import scalafx.scene.control.{Label, TableView, TextField}
 import javafx.scene.control.TableColumn
 
 import scalafx.Includes._
@@ -27,6 +27,8 @@ object FormulaFX extends JFXApp {
       val pane = new BorderPane {
         val results = new TableView[TableRow](tableData) {
           editable = false
+
+          placeholder = new Label("")
 
           columns += new TableColumn[TableRow, String] {
             setText("Expression/Result")
