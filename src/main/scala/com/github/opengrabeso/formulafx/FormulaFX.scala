@@ -9,9 +9,8 @@ import scalafx.beans.property.StringProperty
 import scalafx.scene.Scene
 import scalafx.scene.control.{TableView, TextField}
 import javafx.scene.control.TableColumn
-import javafx.scene.control.TableColumn.CellDataFeatures
-import scalafx.Includes._
 
+import scalafx.Includes._
 import scalafx.scene.layout.BorderPane
 
 object FormulaFX extends JFXApp {
@@ -31,13 +30,8 @@ object FormulaFX extends JFXApp {
 
           columns += new TableColumn[TableRow, String] {
             setText("Expression/Result")
-            setCellValueFactory(
-              new javafx.util.Callback[CellDataFeatures[TableRow, String], ObservableValue[String]]() {
-                override def call(param: CellDataFeatures[TableRow, String]): ObservableValue[String] = {
-                  param.getValue.text
-                }
-              }
-            )
+            val cb: (TableColumn.CellDataFeatures[TableRow, String] => ObservableValue[String]) = _.getValue.text
+            setCellValueFactory(cb)
           }
         }
 
