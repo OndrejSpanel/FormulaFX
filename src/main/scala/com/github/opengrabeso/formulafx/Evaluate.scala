@@ -12,10 +12,9 @@ object Evaluate {
     type Operator = (Number, Number) => Number
     type Function = Number => Number
 
-    def f_sin: Parser[Function] = "sin" ^^^ Math.sin
-    def f_cos: Parser[Function] = "cos" ^^^ Math.cos
-
-    def parseFunctionName: Parser[Function] = f_sin | f_cos
+    def parseFunctionName: Parser[Function] =
+      ("sin" ^^^ (Math.sin: Function)) |
+      ("cos" ^^^ (Math.cos: Function))
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x) }
 
