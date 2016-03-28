@@ -10,6 +10,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{TableView, TextField}
 import javafx.scene.control.TableColumn
 import javafx.scene.control.TableColumn.CellDataFeatures
+import scalafx.Includes._
 
 import scalafx.scene.layout.BorderPane
 
@@ -33,26 +34,35 @@ object FormulaFX extends JFXApp {
             setCellValueFactory(
               new javafx.util.Callback[CellDataFeatures[TableRow, String], ObservableValue[String]]() {
                 override def call(param: CellDataFeatures[TableRow, String]): ObservableValue[String] = {
-                  param.getValue.text
+                  new StringProperty(param.getValue.text)
                 }
               }
             )
           }
         }
 
+        val result = new TextField {
+          editable = false
+        }
         val input = new TextField {
           editable = true
           Platform.runLater(requestFocus())
 
+          onAction = handle {
+            val resultText = Evaluate(text.value)
+            tableData.add(new TableRow(resultText))
+          }
+
           text.onChange {
-            val result = Evaluate(text.value)
-            tableData.add(new TableRow(result))
+            val resultText = Evaluate(text.value)
+            result.text = resultText
             ()
           }
 
         }
-        center = results
-        bottom = input
+        top = results
+        center = input
+        bottom = result
 
       }
 
