@@ -4,12 +4,33 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
   type Number = Double
+  type BoxedNumber = java.lang.Double
 
   var variables = Map[String, Number]()
 
   object ExprParser extends JavaTokenParsers {
-
     type Operator = (Number, Number) => Number
+    type Function = Number => BoxedNumber
+
+    object Functions {
+      def sin(x: BoxedNumber): BoxedNumber = Math.sin(x)
+      def cos(x: BoxedNumber): BoxedNumber = Math.sin(x)
+    }
+
+    import scala.reflect.runtime.universe
+
+    val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+    val module = runtimeMirror.staticModule("Functions")
+    val obj = runtimeMirror.reflectModule(module)
+
+    val functionNames = Functions.getClass.getMethods.map { f =>
+      f.getName -> { x: Number => f.invoke(Functions, x: BoxedNumber).asInstanceOf[BoxedNumber] }
+    }.toMap
+
+
+    def parseFunctionName: Parser[Function] = ident ^^ functionNames
+
+    def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x) }
 
     def minutes: Parser[Number] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) }
     def minutesAndSeconds: Parser[Number] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
@@ -29,9 +50,9 @@ object Evaluate {
     def mulOperators: Parser[Operator] = op_* | op_/
     def addOperators: Parser[Operator] = op_+ | op_-
 
-    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => o(a,b) }) | factor
+    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => o(a, b) }) | factor
 
-    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => o(a,b) }) | term
+    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => o(a, b) }) | term
 
     def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
