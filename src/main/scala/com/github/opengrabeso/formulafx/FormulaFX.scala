@@ -1,5 +1,7 @@
 package com.github.opengrabeso.formulafx
 
+import javafx.application.Platform
+
 import scalafx.application.JFXApp
 import scalafx.scene.Scene
 import scalafx.scene.control.TextField
@@ -12,17 +14,19 @@ object FormulaFX extends JFXApp {
     scene = new Scene {
       val pane = new BorderPane {
         val result = new TextField {
+          editable = false
         }
         val input = new TextField {
           editable = true
+          Platform.runLater(new Runnable {def run() = requestFocus()})
 
           text.onChange {
             result.text = Evaluate(text.value)
           }
 
         }
-        center = input
-        bottom = result
+        center = result
+        bottom = input
 
       }
 
