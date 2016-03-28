@@ -46,7 +46,8 @@ object FormulaFX extends JFXApp {
 
           onAction = handle {
             val resultText = Evaluate(text.value)
-            tableData.add(new TableRow(resultText))
+            tableData.add(new TableRow(text.value))
+            tableData.add(new TableRow("  " + resultText))
             text = ""
           }
 
