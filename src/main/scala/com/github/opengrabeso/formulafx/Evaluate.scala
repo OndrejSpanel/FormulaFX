@@ -18,14 +18,17 @@ object Evaluate {
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | variable) | "(" ~> expr <~ ")"
 
-    def term: Parser[Number] = factor ~ rep("*" ~ factor | "/" ~ factor) ^^ {
+    def mulOperators: Parser[String] = "*" | "/"
+    def addOperators: Parser[String] = "+" | "-"
+
+    def term: Parser[Number] = factor ~ rep(mulOperators ~ factor) ^^ {
       case number ~ list => list.foldLeft(number) {
         case (x, "*" ~ y) => x * y
         case (x, "/" ~ y) => x / y
       }
     }
 
-    def expr: Parser[Number] = term ~ rep("+" ~ term | "-" ~ term) ^^ {
+    def expr: Parser[Number] = term ~ rep(addOperators ~ term) ^^ {
       case number ~ list => list.foldLeft(number) {
         case (x, "+" ~ y) => x + y
         case (x, "-" ~ y) => x - y
