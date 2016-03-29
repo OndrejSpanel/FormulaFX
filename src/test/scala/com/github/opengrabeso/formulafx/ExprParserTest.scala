@@ -2,7 +2,7 @@ package com.github.opengrabeso.formulafx
 
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 class ExprParserTest extends FlatSpec with Matchers {
   "Expression parser" should "compute simple arithmetic expressions" in {
@@ -19,5 +19,15 @@ class ExprParserTest extends FlatSpec with Matchers {
 
   it should "evaluate assignments with functions" in {
     Evaluate.ExprParser("a = 123") shouldBe Success(123.0)
+  }
+
+  it should "fail on malformed expressions" in {
+    Evaluate.ExprParser("1 + / 2") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("1 +") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("/ 2") shouldBe a[Failure[_]]
+  }
+
+  it should "fail when accessing undefined variable" in {
+    Evaluate.ExprParser("unknown + 10") shouldBe a[Failure[_]]
   }
 }

@@ -24,7 +24,7 @@ object Evaluate {
       case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) * sec.toDouble * (1.0 / 3600)
     }
 
-    def variable: Parser[Number] = ident ^^ { x => variables.getOrElse(x, 0.0) }
+    def variable: Parser[Number] = ident ^^ { x => variables(x) }
     def fNumber: Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
@@ -49,9 +49,9 @@ object Evaluate {
 
     def command = assign | expr ^^ { x => x }
 
-    def apply(input: String): Try[Number] = parseAll(command, input) match {
-      case Success(result, _) => util.Success(result)
-      case failure: NoSuccess => util.Failure(new UnsupportedOperationException(failure.msg))
+    def apply(input: String): Try[Number] = Try {parseAll(command, input)}.map {
+      case Success(result, _) => result
+      case failure: NoSuccess => throw new UnsupportedOperationException(failure.msg)
     }
   }
 
