@@ -1,23 +1,36 @@
 package com.github.opengrabeso.formulafx
 
+import scala.language.implicitConversions
 import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
-  type Number = Double
-  type BoxedNumber = java.lang.Double
+  sealed trait Format
+  object Format {
+    object General extends Format
+
+    object Minutes extends Format
+
+    object Seconds extends Format
+  }
+
+  import Format._
+
+  case class Number(x: Double, f: Format)
+
+  implicit def doubleToNumber(x: Double): Number = Number(x, General)
 
   var variables = Map[String, Number]()
 
   object ExprParser extends JavaTokenParsers {
-    type Operator = (Number, Number) => Number
-    type Function = Number => Number
+    type Operator = (Double, Double) => Double
+    type Function = Double => Double
 
     def parseFunctionName: Parser[Function] =
       "sin" ^^^ Math.sin _ |
       "cos" ^^^ Math.cos _
 
-    def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x) }
+    def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
 
     def minutes: Parser[Number] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) }
     def minutesAndSeconds: Parser[Number] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
@@ -37,9 +50,13 @@ object Evaluate {
       "+" ^^^ ({ _ + _ } : Operator) |
       "-" ^^^ ({ _ - _ } : Operator)
 
-    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => o(a, b) }) | factor
+    def combineFormat(a: Number, b: Number) = a.f // TODO: smarter format selection
 
-    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => o(a, b) }) | term
+    def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), combineFormat(a, b))
+
+    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => callOperator(o, a, b) }) | factor
+
+    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => callOperator(o, a, b) }) | term
 
     def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
