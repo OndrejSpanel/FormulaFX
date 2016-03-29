@@ -3,18 +3,38 @@ package com.github.opengrabeso.formulafx
 import com.github.opengrabeso.formulafx.Evaluate.Number
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import Evaluate.Format._
+import org.scalactic.{Equivalence, ConversionCheckedTripleEquals}
 
-class ExprParserTest extends FlatSpec with Matchers {
+class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTripleEquals {
 
   def res(x: Double) = Success(Number(x, General))
+
+  implicit val numberEq = new Equivalence[Try[Number]] {
+    override def areEquivalent(a: Try[Number], b: Try[Number]) = (a, b) match {
+      case (Failure(_), Failure(_)) => true
+      case (Failure(_), Success(_)) => false
+      case (Success(_), Failure(_)) => false
+      case (Success(na), Success(nb)) => na.x == nb.x
+
+    }
+  }
+
 
   "Expression parser" should "compute simple arithmetic expressions" in {
     Evaluate.ExprParser("1") shouldBe res(1)
     Evaluate.ExprParser("1 + 2") shouldBe res(3)
     Evaluate.ExprParser("1 + 2 * 3") shouldBe res(7)
     Evaluate.ExprParser("(1 + 2) * 3") shouldBe res(9)
+  }
+
+  it should "parse minutes" in {
+    Evaluate.ExprParser("1:30") should === (res(1.5))
+  }
+
+  it should "parse minutes and seconds" in {
+    Evaluate.ExprParser("1:30:30") should === (res(1.5 + 30.0/3600))
   }
 
   it should "compute expressions with functions" in {
