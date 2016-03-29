@@ -14,8 +14,8 @@ object Evaluate {
     type Function = Number => Number
 
     def parseFunctionName: Parser[Function] =
-      ("sin" ^^^ Math.sin _) |
-      ("cos" ^^^ Math.cos _)
+      "sin" ^^^ Math.sin _ |
+      "cos" ^^^ Math.cos _
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x) }
 
@@ -29,13 +29,13 @@ object Evaluate {
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
-    def op_* : Parser[Operator] = "*" ^^^ { _ * _ }
-    def op_/ : Parser[Operator] = "/" ^^^ { _ / _ }
-    def op_+ : Parser[Operator] = "+" ^^^ { _ + _ }
-    def op_- : Parser[Operator] = "-" ^^^ { _ - _ }
+    def mulOperators: Parser[Operator] =
+      "*" ^^^ ({ _ * _ } : Operator) |
+      "/" ^^^ ({ _ / _ } : Operator)
 
-    def mulOperators: Parser[Operator] = op_* | op_/
-    def addOperators: Parser[Operator] = op_+ | op_-
+    def addOperators: Parser[Operator] =
+      "+" ^^^ ({ _ + _ } : Operator) |
+      "-" ^^^ ({ _ - _ } : Operator)
 
     def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => o(a, b) }) | factor
 
