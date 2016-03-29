@@ -16,9 +16,18 @@ object Evaluate {
 
   import Format._
 
-  case class Number(x: Double, f: Format)
+  case class Number(x: Double, f: Format) {
+    override def toString = f match {
+      case Minutes => "M:" + x.toString
+      case Seconds => "S:" + x.toString
+      case _ => x.toString
+    }
+  }
 
   implicit def doubleToNumber(x: Double): Number = Number(x, General)
+  implicit class FormattedNumber(val x: Double) extends AnyVal {
+    def format(f: Format) = Number(x, f)
+  }
 
   var variables = Map[String, Number]()
 
@@ -32,9 +41,9 @@ object Evaluate {
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
 
-    def minutes: Parser[Number] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) }
+    def minutes: Parser[Number] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
     def minutesAndSeconds: Parser[Number] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
-      case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) * sec.toDouble * (1.0 / 3600)
+      case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) * sec.toDouble * (1.0 / 3600) format Seconds
     }
 
     def variable: Parser[Number] = ident ^^ { x => variables(x) }
