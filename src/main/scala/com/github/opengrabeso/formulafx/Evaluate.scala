@@ -47,7 +47,7 @@ object Evaluate {
         x
     }
 
-    def command = assign | expr ^^ { x => x }
+    def command = assign | expr
 
     def apply(input: String): Try[Number] = Try {parseAll(command, input)}.map {
       case Success(result, _) => result
