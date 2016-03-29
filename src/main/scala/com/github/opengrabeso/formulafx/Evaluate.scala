@@ -1,5 +1,6 @@
 package com.github.opengrabeso.formulafx
 
+import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
@@ -48,14 +49,14 @@ object Evaluate {
 
     def command = assign | expr ^^ { x => x }
 
-    def apply(input: String): Double = parseAll(command, input) match {
-      case Success(result, _) => result
-      case failure: NoSuccess => 0
+    def apply(input: String): Try[Number] = parseAll(command, input) match {
+      case Success(result, _) => util.Success(result)
+      case failure: NoSuccess => util.Failure(new UnsupportedOperationException(failure.msg))
     }
   }
 
-  def apply(input: String): String = {
-    ExprParser(input).toString
+  def apply(input: String): Try[String] = {
+    ExprParser(input).map(_.toString)
   }
 
 }
