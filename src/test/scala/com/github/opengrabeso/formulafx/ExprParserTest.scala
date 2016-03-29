@@ -1,10 +1,9 @@
 package com.github.opengrabeso.formulafx
 
-import com.github.opengrabeso.formulafx.Evaluate.Number
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
-import Evaluate.Format._
+import Format._
 import org.scalactic.{Equivalence, ConversionCheckedTripleEquals}
 
 class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTripleEquals {
