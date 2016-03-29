@@ -1,14 +1,13 @@
 package com.github.opengrabeso.formulafx
 
-import javafx.beans.value.ObservableValue
-
 import scalafx.application.Platform
 import scalafx.collections.ObservableBuffer
 import scalafx.application.JFXApp
 import scalafx.beans.property.StringProperty
 import scalafx.scene.Scene
 import scalafx.scene.control.{Label, TableView, TextField}
-import javafx.scene.control.TableColumn
+import scalafx.scene.control.TableColumn
+import scalafx.scene.control.TableColumn._
 
 import scalafx.Includes._
 import scalafx.scene.layout.BorderPane
@@ -31,9 +30,8 @@ object FormulaFX extends JFXApp {
           placeholder = new Label("")
 
           columns += new TableColumn[TableRow, String] {
-            setText("Expression/Result")
-            val cb: (TableColumn.CellDataFeatures[TableRow, String] => ObservableValue[String]) = _.getValue.text
-            setCellValueFactory(cb)
+            text = "Expression/Result"
+            cellValueFactory = {_.getValue.text}
           }
         }
 
