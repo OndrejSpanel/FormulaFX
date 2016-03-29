@@ -42,7 +42,7 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("cos(0)") shouldBe res(1)
   }
 
-  it should "evaluate assignments with functions" in {
+  it should "evaluate assignments" in {
     Evaluate.ExprParser("a = 123") shouldBe res(123.0)
   }
 
