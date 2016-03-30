@@ -48,27 +48,27 @@ object Number {
     else ""
   }
 
+  def extract60th(x: Double): (Int, Double) = {
+    val minutes = x * 60
+    val minutesWhole = minutes.toInt
+    val minutesFrac = minutes - minutesWhole
+    (minutesWhole, minutesFrac)
+  }
+
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
     if (x>Int.MaxValue) x.toString
     else {
       val degrees = x.toInt
-      val minutes = (x - degrees) * 60
-      val minutesWhole = minutes.toInt
-      val minutesFrac = minutes - minutesWhole
+      val (minutesWhole, minutesFrac) = extract60th(x - degrees)
       f"$degrees:$minutesWhole%02d${fractionString(minutesFrac, 5)}"
     }
   }
 
-  // TODO: DRY toMinutesPos / toSecondsPos
   def toSecondsPos(x: Double) = {
     val degrees = x.toInt
-    val minutes = (x - degrees) * 60
-    val minutesWhole = minutes.toInt
-    val minutesFrac = minutes - minutesWhole
-    val seconds = minutesFrac * 60
-    val secondsWhole = seconds.toInt
-    val secondsFrac = seconds - secondsWhole
+    val (minutesWhole, minutesFrac) = extract60th(x - degrees)
+    val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
     f"$degrees:$minutesWhole%02d:$secondsWhole%02d${fractionString(secondsFrac, 5)}"
   }
 
