@@ -5,12 +5,13 @@ import scalafx.collections.ObservableBuffer
 import scalafx.application.JFXApp
 import scalafx.beans.property.StringProperty
 import scalafx.scene.Scene
-import scalafx.scene.control.{Label, TableView, TextField}
-import scalafx.scene.control.TableColumn
+import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
+import scalafx.scene.control.MenuItem._
 import scalafx.Includes._
 import scalafx.scene.layout.BorderPane
 
+//noinspection ForwardReference
 object FormulaFX extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "Formula Fx - Expression Calculator"
@@ -23,7 +24,7 @@ object FormulaFX extends JFXApp {
 
     scene = new Scene {
       val pane = new BorderPane {
-        val results = new TableView[TableRow](tableData) {
+        val results = new TableView[TableRow](tableData) { table =>
           editable = false
 
           placeholder = new Label("")
@@ -35,6 +36,16 @@ object FormulaFX extends JFXApp {
             text = "Expression/Result"
             sortable = false
             cellValueFactory = {_.getValue.text}
+          }
+
+          contextMenu = new ContextMenu {
+            items += new MenuItem {
+              text = "Use"
+              onAction = handle {
+                val row = table.selectionModel.value.getSelectedItem
+                input.text = row.text.value
+              }
+            }
           }
         }
 
