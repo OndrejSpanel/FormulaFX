@@ -7,6 +7,14 @@ class NumberTest extends FlatSpec with Matchers {
 
   behavior of "NumberTest"
 
+  it should "skip empty fraction part" in {
+    Number.fractionString(0.0, 5) shouldBe ""
+  }
+
+  it should "format fraction part" in {
+    Number.fractionString(0.5, 5) shouldBe ".5"
+  }
+
   it should "format minutes" in {
     Number(1.5, Minutes).toString shouldBe "1:30"
   }
