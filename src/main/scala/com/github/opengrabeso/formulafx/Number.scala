@@ -82,8 +82,9 @@ object Number {
 }
 
 case class Number(x: Double, f: Format) {
-
   import Number._
+
+  def combineFormat(b: Number): Format = if (f.score >= b.f.score) f else b.f
 
   override def toString = f match {
     case Minutes => toMinutes(x)
