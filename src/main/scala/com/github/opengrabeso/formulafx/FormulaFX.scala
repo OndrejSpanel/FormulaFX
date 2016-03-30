@@ -8,7 +8,6 @@ import scalafx.scene.Scene
 import scalafx.scene.control.{Label, TableView, TextField}
 import scalafx.scene.control.TableColumn
 import scalafx.scene.control.TableColumn._
-
 import scalafx.Includes._
 import scalafx.scene.layout.BorderPane
 
@@ -29,7 +28,10 @@ object FormulaFX extends JFXApp {
 
           placeholder = new Label("")
 
+          columnResizePolicy = TableView.ConstrainedResizePolicy
+
           columns += new TableColumn[TableRow, String] {
+            maxWidth = Int.MaxValue // http://stackoverflow.com/posts/35265368/edit
             text = "Expression/Result"
             cellValueFactory = {_.getValue.text}
           }
