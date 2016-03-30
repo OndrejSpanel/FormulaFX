@@ -7,6 +7,9 @@ class NumberTest extends FlatSpec with Matchers {
 
   behavior of "NumberTest"
 
+  def timeDM(deg: Int, min: Double) = deg + min / 60.0
+  def timeDMS(deg: Int, min: Int, sec: Double) = deg + min / 60.0 + sec / 3600.0
+
   it should "skip empty fraction part" in {
     Number.fractionString(0.0, 5).toString shouldBe ""
   }
@@ -36,10 +39,13 @@ class NumberTest extends FlatSpec with Matchers {
 
   it should "format fractional minutes rounded with overflow" in {
     Number(1.999999999, Minutes).toString shouldBe "2:00"
+    Number(timeDM(1, 0.999999), Minutes).toString shouldBe "1:01"
   }
 
   it should "format fractional seconds rounded with overflow" in {
     Number(1.999999999, Seconds).toString shouldBe "2:00:00"
+    Number(timeDMS(1, 12, 59.999999), Seconds).toString shouldBe "1:13:00"
+    Number(timeDMS(1, 12, 0.999999), Seconds).toString shouldBe "1:12:01"
   }
 
   it should "format seconds" in {
