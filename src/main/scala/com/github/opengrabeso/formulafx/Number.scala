@@ -22,51 +22,106 @@ object Format {
 
 import Format._
 
-import scala.annotation.tailrec
-
 object Number {
-  def fractionString(x: Double, maxLen: Int): String = {
+  def fractionString(x: Double, maxLen: Int): NumberPart = {
 
-    @tailrec
-    def fractionStringRecursive(x: Double, maxLen: Int, res: StringBuilder): StringBuilder = {
-      val threshold = Math.pow(0.1, maxLen)
-      if (x<threshold || maxLen <=0) {
-        assert(x<threshold) // when maxLen is 0, rest should be 10 and this should always pass
-        res
-      } else {
-        assert(x >= 0 && x < 1)
-        val digit = (x * 10).toInt
-        val rest = x * 10 - digit
-        val digitChar = ('0' + digit).toChar
-        fractionStringRecursive(rest, maxLen - 1, res + digitChar)
+    def fractionFormatter(x: Double, digits: Int): String = {
+      if (x == 0) ""
+      else {
+        assert(x.round == x)
+        val xDigits = x.round.toInt.toString
+        "." + "0" * (digits - xDigits.length) + xDigits
       }
     }
 
-    // TODO: round to max digits
-    val fractionalDigits = fractionStringRecursive(x, maxLen, StringBuilder.newBuilder).toString
-    if (fractionalDigits.nonEmpty) "." + fractionalDigits
-    else ""
+    def fractionPartParams(digits: Int) = NumberPartParams(1, Math.pow(10, digits), fractionFormatter(_, digits))
+
+    val scale = Math.pow(10, maxLen)
+    val raw = NumberPart((x * scale).round, fractionPartParams(maxLen))
+
+    def dropTailZeroes(p: NumberPart, maxLen: Int): NumberPart = {
+      if (p.value % 10 == 0 && p.value > 0) {
+        dropTailZeroes(p.copy(p.value / 10, fractionPartParams(maxLen-1)), maxLen-1)
+      } else p
+    }
+
+    val ret = dropTailZeroes(raw, maxLen)
+    ret
   }
+
+  def extract60th(x: Double): (Int, Double) = {
+    val minutes = x * 60
+    val minutesWhole = minutes.toInt
+    val minutesFrac = minutes - minutesWhole
+    (minutesWhole, minutesFrac)
+  }
+
+  case class NumberPartParams(magnitude: Double, scale: Double, format: (Double) => String)
+
+  case class NumberPart(value: Double, params: NumberPartParams) {
+    override def toString = params.format(value)
+  }
+
+  case class NumberByParts(parts: List[NumberPart]) {
+    override def toString = parts.mkString("")
+
+    def doCarry: NumberByParts = {
+
+      def carry(todo: List[NumberPart], isCarry: Boolean, done: List[NumberPart]): List[NumberPart] = {
+        todo match {
+          case Nil => done
+          case head :: tail =>
+            val withCarry = if (isCarry) head.copy(value = head.value + 1) else head
+            val isCarryUp = withCarry.value >= withCarry.params.magnitude * withCarry.params.scale
+            val overflown = if (isCarryUp) {
+              withCarry.copy(value = withCarry.value - withCarry.params.magnitude)
+            } else withCarry
+
+            carry(tail, isCarryUp, overflown +: done)
+        }
+      }
+
+      NumberByParts(carry(parts.reverse, false, Nil))
+    }
+
+  }
+
+  val intPart = NumberPartParams(Int.MaxValue, 1, x => f"${x.toInt}")
+  val minSecPart = NumberPartParams(60, 1, x => f":${x.toInt}%02d")
 
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
-    val degrees = x.toInt
-    val minutes = (x - degrees) * 60
-    val minutesWhole = minutes.toInt
-    val minutesFrac = minutes - minutesWhole
-    f"$degrees:$minutesWhole%02d${fractionString(minutesFrac, 5)}"
+    if (x>Int.MaxValue) x.toString
+    else {
+      val degrees = x.toInt
+      val (minutesWhole, minutesFrac) = extract60th(x - degrees)
+
+      val formatted = NumberByParts(List(
+        NumberPart(degrees, intPart),
+        NumberPart(minutesWhole, minSecPart),
+        fractionString(minutesFrac, 5)
+      ))
+
+      formatted.doCarry.toString
+    }
   }
 
-  // TODO: DRY toMinutesPos / toSecondsPos
   def toSecondsPos(x: Double) = {
-    val degrees = x.toInt
-    val minutes = (x - degrees) * 60
-    val minutesWhole = minutes.toInt
-    val minutesFrac = minutes - minutesWhole
-    val seconds = minutesFrac * 60
-    val secondsWhole = seconds.toInt
-    val secondsFrac = seconds - secondsWhole
-    f"$degrees:$minutesWhole%02d:$secondsWhole%02d${fractionString(secondsFrac, 5)}"
+    if (x>Int.MaxValue) x.toString
+    else {
+      val degrees = x.toInt
+      val (minutesWhole, minutesFrac) = extract60th(x - degrees)
+      val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
+
+      val formatted = NumberByParts(List(
+        NumberPart(degrees, intPart),
+        NumberPart(minutesWhole, minSecPart),
+        NumberPart(secondsWhole, minSecPart),
+        fractionString(secondsFrac, 5)
+      ))
+
+      formatted.doCarry.toString
+    }
   }
 
   def toMinutes(x: Double): String = {
@@ -82,8 +137,9 @@ object Number {
 }
 
 case class Number(x: Double, f: Format) {
-
   import Number._
+
+  def combineFormat(b: Number): Format = if (f.score >= b.f.score) f else b.f
 
   override def toString = f match {
     case Minutes => toMinutes(x)

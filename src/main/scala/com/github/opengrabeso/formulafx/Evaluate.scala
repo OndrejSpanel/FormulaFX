@@ -34,17 +34,17 @@ object Evaluate {
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
+    def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
+
     def mulOperators: Parser[Operator] =
-      "*" ^^^ ({ _ * _ } : Operator) |
-      "/" ^^^ ({ _ / _ } : Operator)
+      operator("*" , _ * _) |
+      operator("/" , _ / _)
 
     def addOperators: Parser[Operator] =
-      "+" ^^^ ({ _ + _ } : Operator) |
-      "-" ^^^ ({ _ - _ } : Operator)
+      operator("+", _ + _) |
+      operator("-", _ - _)
 
-    def combineFormat(a: Number, b: Number): Format = if (a.f.score >= b.f.score) a.f else b.f
-
-    def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), combineFormat(a, b))
+    def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), a combineFormat b)
 
     def processOperators: Number ~ List[Operator ~  Number] => Number = {
       case number ~ list => list.foldLeft(number) { case (x, op ~ y) => callOperator(op, x, y) }
