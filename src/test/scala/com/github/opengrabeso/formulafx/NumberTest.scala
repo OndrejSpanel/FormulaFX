@@ -15,6 +15,10 @@ class NumberTest extends FlatSpec with Matchers {
     Number.fractionString(0.5, 5) shouldBe ".5"
   }
 
+  it should "format fraction part rounded" ignore {
+    Number.fractionString(0.999, 2) shouldBe ".5"
+  }
+
   it should "format minutes" in {
     Number(1.5, Minutes).toString shouldBe "1:30"
   }
@@ -24,10 +28,10 @@ class NumberTest extends FlatSpec with Matchers {
   }
 
   it should "format seconds" in {
-    Number(1 + 1.0/60, Seconds).toString shouldBe "1:00:01"
+    Number(1 + 1.0/3600, Seconds).toString shouldBe "1:00:01"
   }
 
   it should "format fractional seconds" in {
-    Number(1 + 1.11/60, Seconds).toString shouldBe "1:00:01.11"
+    Number(1 + 1.11/3600, Seconds).toString shouldBe "1:00:01.11"
   }
 }
