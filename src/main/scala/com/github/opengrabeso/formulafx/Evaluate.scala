@@ -46,9 +46,13 @@ object Evaluate {
 
     def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), combineFormat(a, b))
 
-    def term: Parser[Number] = (factor ~ mulOperators ~ term ^^ { case a ~ o ~ b => callOperator(o, a, b) }) | factor
+    def term: Parser[Number] = factor ~ rep(mulOperators ~ factor) ^^ {
+      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => callOperator(op, x, y) }
+    }
 
-    def expr: Parser[Number] = (term ~ addOperators ~ expr ^^ { case a ~ o ~ b => callOperator(o, a, b) }) | term
+    def expr: Parser[Number] = term ~ rep(addOperators ~ term) ^^ {
+      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => callOperator(op, x, y) }
+    }
 
     def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
