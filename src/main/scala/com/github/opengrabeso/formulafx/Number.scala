@@ -34,7 +34,7 @@ object Number {
       }
     }
 
-    def fractionPartParams(digits: Int) = NumberPartParams(1, 1 / Math.pow(10, digits), fractionFormatter(_, digits))
+    def fractionPartParams(digits: Int) = NumberPartParams(1, Math.pow(10, digits), fractionFormatter(_, digits))
 
     val scale = Math.pow(10, maxLen)
     val raw = NumberPart((x * scale).round, fractionPartParams(maxLen))
@@ -62,19 +62,28 @@ object Number {
     override def toString = params.format(value)
   }
 
-  case class NumberByParts(parts: Seq[NumberPart]) {
+  case class NumberByParts(parts: List[NumberPart]) {
     override def toString = parts.mkString("")
 
-    def roundToFixed(fracDigits: Int) = {
-      val smallFirst = parts.reverse
-      val rounding = smallFirst.head
+    def doCarry: NumberByParts = {
 
-      val precision = rounding.params.magnitude * Math.pow(0.1, fracDigits)
+      def carry(todo: List[NumberPart], isCarry: Boolean, done: List[NumberPart]): List[NumberPart] = {
+        todo match {
+          case Nil => done
+          case head :: tail =>
+            val withCarry = if (isCarry) head.copy(value = head.value + 1) else head
+            val isCarryUp = withCarry.value >= withCarry.params.magnitude * withCarry.params.scale
+            val overflown = if (isCarryUp) {
+              withCarry.copy(value = withCarry.value - withCarry.params.magnitude)
+            } else withCarry
 
-      rounding.value
+            carry(tail, isCarryUp, overflown +: done)
+        }
+      }
+
+      NumberByParts(carry(parts.reverse, false, Nil))
     }
 
-    def roundToSignificant(significantDigits: Int) = this
   }
 
   val intPart = NumberPartParams(Int.MaxValue, 1, x => f"${x.toInt}")
@@ -87,13 +96,13 @@ object Number {
       val degrees = x.toInt
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
 
-      val formatted = NumberByParts(Seq(
+      val formatted = NumberByParts(List(
         NumberPart(degrees, intPart),
         NumberPart(minutesWhole, minSecPart),
         fractionString(minutesFrac, 5)
       ))
 
-      formatted.toString
+      formatted.doCarry.toString
     }
   }
 
@@ -104,14 +113,14 @@ object Number {
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
       val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
 
-      val formatted = NumberByParts(Seq(
+      val formatted = NumberByParts(List(
         NumberPart(degrees, intPart),
         NumberPart(minutesWhole, minSecPart),
         NumberPart(secondsWhole, minSecPart),
         fractionString(secondsFrac, 5)
       ))
 
-      formatted.toString
+      formatted.doCarry.toString
     }
   }
 

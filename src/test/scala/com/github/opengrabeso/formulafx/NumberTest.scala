@@ -21,11 +21,6 @@ class NumberTest extends FlatSpec with Matchers {
     Number.fractionString(0.555, 2).toString shouldBe ".56"
   }
 
-
-  it should "format fraction part rounded with overflow" ignore {
-    Number.fractionString(0.999, 2).toString shouldBe "1.0"
-  }
-
   it should "format minutes" in {
     Number(1.5, Minutes).toString shouldBe "1:30"
   }
@@ -37,6 +32,14 @@ class NumberTest extends FlatSpec with Matchers {
 
   it should "format fractional minutes" in {
     Number(1.53, Minutes).toString shouldBe "1:31.8"
+  }
+
+  it should "format fractional minutes rounded with overflow" in {
+    Number(1.999999999, Minutes).toString shouldBe "2:00"
+  }
+
+  it should "format fractional seconds rounded with overflow" in {
+    Number(1.999999999, Seconds).toString shouldBe "2:00:00"
   }
 
   it should "format seconds" in {
