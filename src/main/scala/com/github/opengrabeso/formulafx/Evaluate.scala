@@ -42,7 +42,7 @@ object Evaluate {
       "+" ^^^ ({ _ + _ } : Operator) |
       "-" ^^^ ({ _ - _ } : Operator)
 
-    def combineFormat(a: Number, b: Number) = a.f // TODO: smarter format selection
+    def combineFormat(a: Number, b: Number): Format = if (a.f.score >= b.f.score) a.f else b.f
 
     def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), combineFormat(a, b))
 

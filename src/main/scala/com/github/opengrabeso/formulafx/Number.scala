@@ -1,12 +1,20 @@
 package com.github.opengrabeso.formulafx
 
-sealed trait Format
+sealed trait Format {
+  def score: Int
+}
 object Format {
-  object General extends Format
+  object General extends Format {
+    def score = 10
+  }
 
-  object Minutes extends Format
+  object Minutes extends Format {
+    def score = 20
+  }
 
-  object Seconds extends Format
+  object Seconds extends Format {
+    def score = 30
+  }
 }
 
 import Format._
