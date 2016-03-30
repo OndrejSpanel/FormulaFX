@@ -22,30 +22,31 @@ object Format {
 
 import Format._
 
-import scala.annotation.tailrec
-
 object Number {
-  def fractionString(x: Double, maxLen: Int): String = {
+  def fractionString(x: Double, maxLen: Int): NumberPart = {
 
-    @tailrec
-    def fractionStringRecursive(x: Double, maxLen: Int, res: StringBuilder): StringBuilder = {
-      val threshold = Math.pow(0.1, maxLen)
-      if (x<threshold || maxLen <=0) {
-        assert(x<threshold) // when maxLen is 0, rest should be 10 and this should always pass
-        res
-      } else {
-        assert(x >= 0 && x < 1)
-        val digit = (x * 10).toInt
-        val rest = x * 10 - digit
-        val digitChar = ('0' + digit).toChar
-        fractionStringRecursive(rest, maxLen - 1, res + digitChar)
+    def fractionFormatter(x: Double, digits: Int): String = {
+      if (x == 0) ""
+      else {
+        assert(x.round == x)
+        val xDigits = x.round.toInt.toString
+        "." + "0" * (digits - xDigits.length) + xDigits
       }
     }
 
-    // TODO: round to max digits
-    val fractionalDigits = fractionStringRecursive(x, maxLen, StringBuilder.newBuilder).toString
-    if (fractionalDigits.nonEmpty) "." + fractionalDigits
-    else ""
+    def fractionPartParams(digits: Int) = NumberPartParams(1, 1 / Math.pow(10, digits), fractionFormatter(_, digits))
+
+    val scale = Math.pow(10, maxLen)
+    val raw = NumberPart((x * scale).round, fractionPartParams(maxLen))
+
+    def dropTailZeroes(p: NumberPart, maxLen: Int): NumberPart = {
+      if (p.value % 10 == 0 && p.value > 0) {
+        dropTailZeroes(p.copy(p.value / 10, fractionPartParams(maxLen-1)), maxLen-1)
+      } else p
+    }
+
+    val ret = dropTailZeroes(raw, maxLen)
+    ret
   }
 
   def extract60th(x: Double): (Int, Double) = {
@@ -55,15 +56,29 @@ object Number {
     (minutesWhole, minutesFrac)
   }
 
-  case class NumberPartParams(magnitude: Double, format: (Double) => String)
+  case class NumberPartParams(magnitude: Double, scale: Double, format: (Double) => String)
 
   case class NumberPart(value: Double, params: NumberPartParams) {
     override def toString = params.format(value)
   }
 
-  val intPart = NumberPartParams(Int.MaxValue, x => f"${x.toInt}")
-  val minSecPart = NumberPartParams(60, x => f":${x.toInt}%02d")
-  val fracPart = NumberPartParams(1, fractionString(_, 5))
+  case class NumberByParts(parts: Seq[NumberPart]) {
+    override def toString = parts.mkString("")
+
+    def roundToFixed(fracDigits: Int) = {
+      val smallFirst = parts.reverse
+      val rounding = smallFirst.head
+
+      val precision = rounding.params.magnitude * Math.pow(0.1, fracDigits)
+
+      rounding.value
+    }
+
+    def roundToSignificant(significantDigits: Int) = this
+  }
+
+  val intPart = NumberPartParams(Int.MaxValue, 1, x => f"${x.toInt}")
+  val minSecPart = NumberPartParams(60, 1, x => f":${x.toInt}%02d")
 
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
@@ -72,13 +87,13 @@ object Number {
       val degrees = x.toInt
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
 
-      val formatted = Seq(
+      val formatted = NumberByParts(Seq(
         NumberPart(degrees, intPart),
         NumberPart(minutesWhole, minSecPart),
-        NumberPart(minutesFrac, fracPart)
-      )
+        fractionString(minutesFrac, 5)
+      ))
 
-      formatted.mkString("")
+      formatted.toString
     }
   }
 
@@ -89,14 +104,14 @@ object Number {
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
       val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
 
-      val formatted = Seq(
+      val formatted = NumberByParts(Seq(
         NumberPart(degrees, intPart),
         NumberPart(minutesWhole, minSecPart),
         NumberPart(secondsWhole, minSecPart),
-        NumberPart(secondsFrac, fracPart)
-      )
+        fractionString(secondsFrac, 5)
+      ))
 
-      formatted.mkString("")
+      formatted.toString
     }
   }
 

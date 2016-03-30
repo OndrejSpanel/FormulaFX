@@ -8,15 +8,22 @@ class NumberTest extends FlatSpec with Matchers {
   behavior of "NumberTest"
 
   it should "skip empty fraction part" in {
-    Number.fractionString(0.0, 5) shouldBe ""
+    Number.fractionString(0.0, 5).toString shouldBe ""
   }
 
   it should "format fraction part" in {
-    Number.fractionString(0.5, 5) shouldBe ".5"
+    Number.fractionString(0.5, 5).toString shouldBe ".5"
+    Number.fractionString(0.05, 5).toString shouldBe ".05"
   }
 
-  it should "format fraction part rounded" ignore {
-    Number.fractionString(0.999, 2) shouldBe ".5"
+  it should "format fraction part rounded" in {
+    Number.fractionString(0.222, 2).toString shouldBe ".22"
+    Number.fractionString(0.555, 2).toString shouldBe ".56"
+  }
+
+
+  it should "format fraction part rounded with overflow" ignore {
+    Number.fractionString(0.999, 2).toString shouldBe "1.0"
   }
 
   it should "format minutes" in {
