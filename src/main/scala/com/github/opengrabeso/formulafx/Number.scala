@@ -42,8 +42,7 @@ object Number {
       }
     }
 
-    // TODO: round to max expected digits
-    // TODO: smart rounding based on Double precision
+    // TODO: round to max digits
     val fractionalDigits = fractionStringRecursive(x, maxLen, StringBuilder.newBuilder).toString
     if (fractionalDigits.nonEmpty) "." + fractionalDigits
     else ""
@@ -51,16 +50,11 @@ object Number {
 
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
-    val mins = x.toInt
-    val secs = (x - mins) * 60
+    val minutes = x.toInt
+    val secs = (x - minutes) * 60
     val secsWhole = secs.toInt
-    // TODO: secs fracs
-    // determine how many fractional digits to print
-
-    //val secsFrac = secs - secsWhole
-    //f"$mins:$secsWhole%02d$secsFrac%f"
     val secsFrac = secs - secsWhole
-    f"$mins:$secsWhole%02d${fractionString(secsFrac, 5)}"
+    f"$minutes:$secsWhole%02d${fractionString(secsFrac, 5)}"
   }
 
   def toMinutes(x: Double): String = {
