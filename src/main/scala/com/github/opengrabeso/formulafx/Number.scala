@@ -50,11 +50,14 @@ object Number {
 
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
-    val degrees = x.toInt
-    val minutes = (x - degrees) * 60
-    val minutesWhole = minutes.toInt
-    val minutesFrac = minutes - minutesWhole
-    f"$degrees:$minutesWhole%02d${fractionString(minutesFrac, 5)}"
+    if (x>Int.MaxValue) x.toString
+    else {
+      val degrees = x.toInt
+      val minutes = (x - degrees) * 60
+      val minutesWhole = minutes.toInt
+      val minutesFrac = minutes - minutesWhole
+      f"$degrees:$minutesWhole%02d${fractionString(minutesFrac, 5)}"
+    }
   }
 
   // TODO: DRY toMinutesPos / toSecondsPos

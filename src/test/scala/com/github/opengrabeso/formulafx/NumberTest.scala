@@ -23,6 +23,10 @@ class NumberTest extends FlatSpec with Matchers {
     Number(1.5, Minutes).toString shouldBe "1:30"
   }
 
+  it should "handle huge time gracefully" in {
+    Number(1e10, Minutes).toString shouldBe 1e10.toString
+  }
+
   it should "format fractional minutes" in {
     Number(1.53, Minutes).toString shouldBe "1:31.8"
   }
