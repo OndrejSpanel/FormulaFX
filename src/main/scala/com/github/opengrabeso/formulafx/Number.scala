@@ -65,11 +65,23 @@ object Number {
     }
   }
 
+  case class NumberPart(value: Double, format: (Double) => String) {
+    override def toString = format(value)
+  }
+
   def toSecondsPos(x: Double) = {
     val degrees = x.toInt
     val (minutesWhole, minutesFrac) = extract60th(x - degrees)
     val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
-    f"$degrees:$minutesWhole%02d:$secondsWhole%02d${fractionString(secondsFrac, 5)}"
+
+    val formatted = Seq(
+      NumberPart(degrees, x => f"${x.toInt}"),
+      NumberPart(minutesWhole, x => f":${x.toInt}%02d"),
+      NumberPart(secondsWhole, x => f":${x.toInt}%02d"),
+      NumberPart(secondsFrac, x => fractionString(x, 5))
+    )
+
+    formatted.map(f =>f.format(f.value)).mkString("")
   }
 
   def toMinutes(x: Double): String = {
