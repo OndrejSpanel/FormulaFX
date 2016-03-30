@@ -33,6 +33,7 @@ object FormulaFX extends JFXApp {
           columns += new TableColumn[TableRow, String] {
             maxWidth = Int.MaxValue // http://stackoverflow.com/posts/35265368/edit
             text = "Expression/Result"
+            sortable = false
             cellValueFactory = {_.getValue.text}
           }
         }
