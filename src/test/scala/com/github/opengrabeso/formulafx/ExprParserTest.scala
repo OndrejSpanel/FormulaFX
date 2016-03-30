@@ -20,7 +20,6 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     }
   }
 
-
   "Expression parser" should "compute simple arithmetic expressions" in {
     Evaluate.ExprParser("1") shouldBe res(1)
     Evaluate.ExprParser("1 + 2") shouldBe res(3)
@@ -28,7 +27,7 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("(1 + 2) * 3") shouldBe res(9)
   }
 
-  "Expression parser" should "compute expressions with correct associativity" in {
+  it should "compute expressions with correct associativity" in {
     Evaluate.ExprParser("2-1-1") shouldBe res(0)
     Evaluate.ExprParser("4/2/2") shouldBe res(1)
   }
