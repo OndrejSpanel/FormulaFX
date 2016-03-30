@@ -9,6 +9,7 @@ import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
 import scalafx.Includes._
+import scalafx.scene.control.cell.TextFieldTableCell
 import scalafx.scene.layout.BorderPane
 
 //noinspection ForwardReference
@@ -36,6 +37,9 @@ object FormulaFX extends JFXApp {
             text = "Expression/Result"
             sortable = false
             cellValueFactory = {_.getValue.text}
+
+            cellFactory = TextFieldTableCell.forTableColumn[TableRow]()
+            //cellFactory = _ => new TextFieldTableCell[TableRow, String](new DefaultStringConverter()) { }
           }
 
           contextMenu = new ContextMenu {
