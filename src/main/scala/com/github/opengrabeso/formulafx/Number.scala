@@ -55,33 +55,49 @@ object Number {
     (minutesWhole, minutesFrac)
   }
 
+  case class NumberPartParams(magnitude: Double, format: (Double) => String)
+
+  case class NumberPart(value: Double, params: NumberPartParams) {
+    override def toString = params.format(value)
+  }
+
+  val intPart = NumberPartParams(Int.MaxValue, x => f"${x.toInt}")
+  val minSecPart = NumberPartParams(60, x => f":${x.toInt}%02d")
+  val fracPart = NumberPartParams(1, fractionString(_, 5))
+
   def toMinutesPos(x: Double) = {
     assert(x >= 0)
     if (x>Int.MaxValue) x.toString
     else {
       val degrees = x.toInt
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
-      f"$degrees:$minutesWhole%02d${fractionString(minutesFrac, 5)}"
+
+      val formatted = Seq(
+        NumberPart(degrees, intPart),
+        NumberPart(minutesWhole, minSecPart),
+        NumberPart(minutesFrac, fracPart)
+      )
+
+      formatted.mkString("")
     }
   }
 
-  case class NumberPart(value: Double, format: (Double) => String) {
-    override def toString = format(value)
-  }
-
   def toSecondsPos(x: Double) = {
-    val degrees = x.toInt
-    val (minutesWhole, minutesFrac) = extract60th(x - degrees)
-    val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
+    if (x>Int.MaxValue) x.toString
+    else {
+      val degrees = x.toInt
+      val (minutesWhole, minutesFrac) = extract60th(x - degrees)
+      val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
 
-    val formatted = Seq(
-      NumberPart(degrees, x => f"${x.toInt}"),
-      NumberPart(minutesWhole, x => f":${x.toInt}%02d"),
-      NumberPart(secondsWhole, x => f":${x.toInt}%02d"),
-      NumberPart(secondsFrac, x => fractionString(x, 5))
-    )
+      val formatted = Seq(
+        NumberPart(degrees, intPart),
+        NumberPart(minutesWhole, minSecPart),
+        NumberPart(secondsWhole, minSecPart),
+        NumberPart(secondsFrac, fracPart)
+      )
 
-    formatted.map(f =>f.format(f.value)).mkString("")
+      formatted.mkString("")
+    }
   }
 
   def toMinutes(x: Double): String = {
