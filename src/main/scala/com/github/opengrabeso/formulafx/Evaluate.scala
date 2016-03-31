@@ -5,6 +5,7 @@ import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
+
   import Format._
 
   implicit def doubleToNumber(x: Double): Number = Number(x, General)
@@ -12,7 +13,30 @@ object Evaluate {
     def format(f: Format) = Number(x, f)
   }
 
-  var variables = Map[String, Number]()
+  private var variables = Map[String, Number]()
+  sealed trait AngleUnit {
+    def toRadians(x: Double): Double
+    def fromRadians(x: Double): Double
+  }
+  object AngleUnit {
+    object Radian extends AngleUnit {
+      override def toRadians(x: Double) = x
+      override def fromRadians(x: Double) = x
+    }
+    object Degree extends AngleUnit{
+      override def toRadians(x: Double) = x.toRadians
+      override def fromRadians(x: Double) = x.toDegrees
+    }
+  }
+
+  private var angleUnit: AngleUnit = AngleUnit.Radian
+
+  def angleUnitDegree(): Unit = angleUnit = AngleUnit.Degree
+
+  def angleUnitRadian(): Unit = angleUnit = AngleUnit.Radian
+
+  def angleToRadians(x: Double) = angleUnit.toRadians(x)
+  def angleFromRadians(x: Double) = angleUnit.fromRadians(x)
 
   object ExprParser extends JavaTokenParsers {
     type Operator = (Double, Double) => Double
@@ -20,15 +44,21 @@ object Evaluate {
 
     def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
     def function[T](p: Parser[T], v: => Function): Parser[Function] = p ^^^ v
+
     def functionDouble[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(v(x), General)}
+    def functionParAngle[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(v(angleToRadians(x)), General)}
+    def functionRetAngle[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(angleFromRadians(v(x)), General)}
 
     def parseFunctionName: Parser[Function] =
-        function("sin", Math.sin) |
-        function("cos", Math.cos) |
-        function("tan", Math.tan) |
-        function("asin", Math.asin) |
-        function("acos", Math.acos) |
-        function("atan", Math.atan) |
+      functionParAngle("sin", Math.sin) |
+        functionParAngle("cos", Math.cos) |
+        functionParAngle("tan", Math.tan) |
+        functionRetAngle("asin", Math.asin) |
+        functionRetAngle("acos", Math.acos) |
+        functionRetAngle("atan", Math.atan) |
+        functionParAngle("sinh", Math.sinh) |
+        functionParAngle("cosh", Math.cosh) |
+        functionParAngle("tanh", Math.tanh) |
         function("exp", Math.exp) |
         function("ln", Math.log) |
         function("log", Math.log10) |
@@ -38,9 +68,6 @@ object Evaluate {
         functionDouble("round", x => Math.round(x)) |
         functionDouble("abs", Math.abs) |
         functionDouble("signum", Math.signum) |
-        function("sinh", Math.sinh) |
-        function("cosh", Math.cosh) |
-        function("tanh", Math.tanh) |
         function("hex", x => Number(x, Hex))
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }

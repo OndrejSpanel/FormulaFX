@@ -12,7 +12,7 @@ import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
 import scalafx.scene.control.Menu._
 import scalafx.Includes.{function12jfxCallback => _, _}
-import scalafx.scene.input.{KeyCharacterCombination, KeyCombination, MouseButton, MouseEvent}
+import scalafx.scene.input._
 import scalafx.scene.layout.{BorderPane, VBox}
 
 case class TableRowText(t: String) {
@@ -92,14 +92,32 @@ object FormulaFX extends JFXApp {
 
       val menuBar = new MenuBar {
         useSystemMenuBar = true
-        menus add new Menu("File") {
-          items = Seq(
-            new MenuItem("Clear history") {
-              accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
-              onAction = handle {clearTable()}
-            }
-          )
-        }
+        menus = Seq(
+          new Menu("File") {
+            items = Seq(
+              new MenuItem("Clear history") {
+                accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
+                onAction = handle {clearTable()}
+              }
+            )
+          },
+          new Menu("Settings") {
+            items = Seq(
+              new Menu("Angle unit") {
+                items = Seq(
+                  new MenuItem("Radian") {
+                    accelerator = new KeyCodeCombination(KeyCode.F9)
+                    onAction = handle {Evaluate.angleUnitRadian()}
+                  },
+                  new MenuItem("Degree") {
+                    accelerator = new KeyCodeCombination(KeyCode.F10)
+                    onAction = handle {Evaluate.angleUnitDegree()}
+                  }
+                )
+              }
+            )
+          }
+        )
       }
 
       val pane = new BorderPane {
