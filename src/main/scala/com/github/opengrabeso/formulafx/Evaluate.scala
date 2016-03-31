@@ -18,25 +18,28 @@ object Evaluate {
     type Operator = (Double, Double) => Double
     type Function = Double => Double
 
+    def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
+    def function[T](p: Parser[T], v: => Function): Parser[Function] = p ^^^ v
+
     def parseFunctionName: Parser[Function] =
-      "sin" ^^^ Math.sin _ |
-        "cos" ^^^ Math.cos _ |
-        "tan" ^^^ Math.tan _ |
-        "asin" ^^^ Math.asin _ |
-        "acos" ^^^ Math.acos _ |
-        "atan" ^^^ Math.atan _ |
-        "exp" ^^^ Math.exp _ |
-        "ln" ^^^ Math.log _ |
-        "log" ^^^ Math.log10 _ |
-        "sqrt" ^^^ Math.sqrt _ |
-        "floor" ^^^ Math.floor _ |
-        "ceil" ^^^ Math.ceil _ |
-        "round" ^^^ {(x : Double) => Math.round(x).toDouble} |
-        "abs" ^^^ {(x : Double) => Math.abs(x) } |
-        "signum" ^^^ {(x : Double) => Math.signum(x) } |
-        "sinh" ^^^ Math.sinh _ |
-        "cosh" ^^^ Math.cosh _ |
-        "tanh" ^^^ Math.tanh _
+        function("sin", Math.sin) |
+        function("cos", Math.cos) |
+        function("tan", Math.tan) |
+        function("asin", Math.asin) |
+        function("acos", Math.acos) |
+        function("atan", Math.atan) |
+        function("exp", Math.exp) |
+        function("ln", Math.log) |
+        function("log", Math.log10) |
+        function("sqrt", Math.sqrt) |
+        function("floor", Math.floor) |
+        function("ceil", Math.ceil) |
+        function("round", x => Math.round(x)) |
+        function("abs", Math.abs) |
+        function("signum", Math.signum) |
+        function("sinh", Math.sinh) |
+        function("cosh", Math.cosh) |
+        function("tanh", Math.tanh)
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
 
@@ -50,7 +53,6 @@ object Evaluate {
     def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
-    def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
 
     def mulOperators: Parser[Operator] =
       operator("*" , _ * _) |
