@@ -9,10 +9,8 @@ import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
 import scalafx.Includes.{function12jfxCallback => _, _}
-import scalafx.scene.control.cell.TextFieldTableCell
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.BorderPane
-import scalafx.util.converter.DefaultStringConverter
 
 case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
@@ -35,25 +33,26 @@ object FormulaFX extends JFXApp {
 
           columnResizePolicy = TableView.ConstrainedResizePolicy
 
+          def useSelectedRow(): Unit = {
+            val row = table.selectionModel.value.getSelectedItem
+            input.text = row.text.value
+          }
+
           columns += new TableColumn[TableRowText, String] {
             maxWidth = Int.MaxValue // http://stackoverflow.com/posts/35265368/edit
             text = "Expression/Result"
             sortable = false
             cellValueFactory = {_.getValue.text}
+          }
 
-            cellFactory = _ => new TextFieldTableCell[TableRowText, String](new DefaultStringConverter()) {
-              onMouseClicked = (me: MouseEvent) => {
-                if (me.button == MouseButton.PRIMARY && me.clickCount == 2) {
-                  useSelectedRow()
-                }
+          rowFactory = t => new TableRow[TableRowText] {
+            onMouseClicked = (me: MouseEvent) => {
+              if (me.button == MouseButton.PRIMARY && me.clickCount == 2) {
+                useSelectedRow()
               }
             }
           }
 
-          def useSelectedRow(): Unit = {
-            val row = table.selectionModel.value.getSelectedItem
-            input.text = row.text.value
-          }
           contextMenu = new ContextMenu {
             items += new MenuItem {
               text = "Use"
