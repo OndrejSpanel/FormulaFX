@@ -38,7 +38,6 @@ object FormulaFX extends JFXApp {
       tableData.zipWithIndex.foreach {
         case (row,i) =>
           prefs.put(rowId(i), row.text.value)
-          println(s"Save ${rowId(i)} ${row.text.value}")
       }
       for (i <- tableData.size until oldSize) {
         prefs.remove(rowId(i))
@@ -49,7 +48,14 @@ object FormulaFX extends JFXApp {
     def loadSession(): Unit = {
       val version = prefs.get("version", "")
       if (version.nonEmpty) {
-
+        val rows = prefs.getInt("rows", 0)
+        tableData.clear()
+        for (i <- 0 until rows) {
+          val row = prefs.get(rowId(i), "")
+          tableData.add(TableRowText(row))
+          // we need to execute even lines so that variables are initialized
+          if ((i%2) == 0) Evaluate(row)
+        }
       }
     }
 
