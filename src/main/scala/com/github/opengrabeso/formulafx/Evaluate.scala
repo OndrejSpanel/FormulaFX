@@ -22,18 +22,24 @@ object Evaluate {
     object Radian extends AngleUnit {
       override def toRadians(x: Double) = x
       override def fromRadians(x: Double) = x
+      override def toString = "Radian"
     }
     object Degree extends AngleUnit{
       override def toRadians(x: Double) = x.toRadians
       override def fromRadians(x: Double) = x.toDegrees
+      override def toString = "Degree"
     }
   }
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
 
   def angleUnitDegree(): Unit = angleUnit = AngleUnit.Degree
-
   def angleUnitRadian(): Unit = angleUnit = AngleUnit.Radian
+  def angleUnitName: String = angleUnit.toString
+
+  def angleUnitIsDegree: Boolean = angleUnit == AngleUnit.Degree
+
+  def angleUnitIsRadian: Boolean = angleUnit == AngleUnit.Radian
 
   def angleToRadians(x: Double) = angleUnit.toRadians(x)
   def angleFromRadians(x: Double) = angleUnit.fromRadians(x)

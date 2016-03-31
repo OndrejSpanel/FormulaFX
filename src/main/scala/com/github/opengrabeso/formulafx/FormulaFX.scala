@@ -89,6 +89,16 @@ object FormulaFX extends JFXApp {
         }
 
       }
+      val statusBar = new Label
+
+      private val menuRadian = new CheckMenuItem("Radian") {
+        accelerator = new KeyCodeCombination(KeyCode.F9)
+        onAction = handle {Evaluate.angleUnitRadian(); showStatus()}
+      }
+      private val menuDegree = new CheckMenuItem("Degree") {
+        accelerator = new KeyCodeCombination(KeyCode.F10)
+        onAction = handle {Evaluate.angleUnitDegree(); showStatus()}
+      }
 
       val menuBar = new MenuBar {
         useSystemMenuBar = true
@@ -104,20 +114,17 @@ object FormulaFX extends JFXApp {
           new Menu("Settings") {
             items = Seq(
               new Menu("Angle unit") {
-                items = Seq(
-                  new MenuItem("Radian") {
-                    accelerator = new KeyCodeCombination(KeyCode.F9)
-                    onAction = handle {Evaluate.angleUnitRadian()}
-                  },
-                  new MenuItem("Degree") {
-                    accelerator = new KeyCodeCombination(KeyCode.F10)
-                    onAction = handle {Evaluate.angleUnitDegree()}
-                  }
-                )
+                items = Seq(menuRadian, menuDegree)
               }
             )
           }
         )
+      }
+
+      def showStatus(): Unit = {
+        statusBar.text.value = Evaluate.angleUnitName
+        menuDegree.selected = Evaluate.angleUnitIsDegree
+        menuRadian.selected = Evaluate.angleUnitIsRadian
       }
 
       val pane = new BorderPane {
@@ -161,11 +168,12 @@ object FormulaFX extends JFXApp {
 
         top = menuBar
         center = results
-        bottom = new VBox(input, result)
+        bottom = new VBox(input, result, statusBar)
 
       }
 
       root = pane
+      showStatus()
 
     }
   }
