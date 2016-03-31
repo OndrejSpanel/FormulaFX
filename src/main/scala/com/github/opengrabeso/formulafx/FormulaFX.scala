@@ -11,15 +11,17 @@ import scalafx.scene.control.MenuItem._
 import scalafx.Includes._
 import scalafx.scene.control.cell.TextFieldTableCell
 import scalafx.scene.layout.BorderPane
+import scalafx.util.converter.DefaultStringConverter
+
+case class TableRow(t: String) {
+  val text = new StringProperty(this, "text", t)
+}
 
 //noinspection ForwardReference
 object FormulaFX extends JFXApp {
   stage = new JFXApp.PrimaryStage {
     title.value = "Formula Fx - Expression Calculator"
 
-    case class TableRow(t: String) {
-      val text = new StringProperty(this, "text", t)
-    }
 
     val tableData = ObservableBuffer[TableRow]()
 
@@ -38,8 +40,12 @@ object FormulaFX extends JFXApp {
             sortable = false
             cellValueFactory = {_.getValue.text}
 
-            cellFactory = TextFieldTableCell.forTableColumn[TableRow]()
-            //cellFactory = _ => new TextFieldTableCell[TableRow, String](new DefaultStringConverter()) { }
+            //cellFactory = TextFieldTableCell.forTableColumn[TableRow]()
+            def factory(x: TableColumn[TableRow, String]) = new TextFieldTableCell[TableRow, String](new DefaultStringConverter())
+
+            cellFactory = factory _
+
+            //cellFactory = _ => new TextFieldTableCell[TableRow, String](new DefaultStringConverter())
           }
 
           contextMenu = new ContextMenu {
