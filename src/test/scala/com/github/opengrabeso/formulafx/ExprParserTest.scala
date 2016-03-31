@@ -27,6 +27,13 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("(1 + 2) * 3") shouldBe res(9)
   }
 
+  "Expression parser" should "reject invalid expressions" in {
+    Evaluate.ExprParser("1+*2") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("1+)3") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("(1+)3") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("(13") shouldBe a[Failure[_]]
+  }
+
   it should "compute expressions with correct associativity" in {
     Evaluate.ExprParser("2-1-1") shouldBe res(0)
     Evaluate.ExprParser("4/2/2") shouldBe res(1)
