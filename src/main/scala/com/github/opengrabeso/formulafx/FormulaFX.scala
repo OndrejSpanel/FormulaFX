@@ -13,7 +13,7 @@ import scalafx.scene.control.cell.TextFieldTableCell
 import scalafx.scene.layout.BorderPane
 import scalafx.util.converter.DefaultStringConverter
 
-case class TableRow(t: String) {
+case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
 }
 
@@ -23,29 +23,29 @@ object FormulaFX extends JFXApp {
     title.value = "Formula Fx - Expression Calculator"
 
 
-    val tableData = ObservableBuffer[TableRow]()
+    val tableData = ObservableBuffer[TableRowText]()
 
     scene = new Scene {
       val pane = new BorderPane {
-        val results = new TableView[TableRow](tableData) { table =>
+        val results = new TableView[TableRowText](tableData) { table =>
           editable = false
 
           placeholder = new Label("")
 
           columnResizePolicy = TableView.ConstrainedResizePolicy
 
-          columns += new TableColumn[TableRow, String] {
+          columns += new TableColumn[TableRowText, String] {
             maxWidth = Int.MaxValue // http://stackoverflow.com/posts/35265368/edit
             text = "Expression/Result"
             sortable = false
             cellValueFactory = {_.getValue.text}
 
             //cellFactory = TextFieldTableCell.forTableColumn[TableRow]()
-            def factory(x: TableColumn[TableRow, String]) = new TextFieldTableCell[TableRow, String](new DefaultStringConverter())
+            def factory(x: TableColumn[TableRowText, String]) = new TextFieldTableCell[TableRowText, String](new DefaultStringConverter())
 
             cellFactory = factory _
 
-            //cellFactory = _ => new TextFieldTableCell[TableRow, String](new DefaultStringConverter())
+            //cellFactory = _ => new TextFieldTableCell[TableRowText, String](new DefaultStringConverter())
           }
 
           contextMenu = new ContextMenu {
@@ -69,8 +69,8 @@ object FormulaFX extends JFXApp {
           onAction = handle {
             val resultText = Evaluate(text.value)
             resultText.map { res =>
-              tableData.add(new TableRow(text.value))
-              tableData.add(new TableRow("  " + res))
+              tableData.add(new TableRowText(text.value))
+              tableData.add(new TableRowText("  " + res))
               text = ""
             }
           }
