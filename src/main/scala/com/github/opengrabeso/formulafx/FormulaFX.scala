@@ -44,19 +44,21 @@ object FormulaFX extends JFXApp {
             cellFactory = _ => new TextFieldTableCell[TableRowText, String](new DefaultStringConverter()) {
               onMouseClicked = (me: MouseEvent) => {
                 if (me.button == MouseButton.PRIMARY && me.clickCount == 2) {
-                  val row = table.selectionModel.value.getSelectedItem
-                  input.text = row.text.value
+                  useSelectedRow()
                 }
               }
             }
           }
 
+          def useSelectedRow(): Unit = {
+            val row = table.selectionModel.value.getSelectedItem
+            input.text = row.text.value
+          }
           contextMenu = new ContextMenu {
             items += new MenuItem {
               text = "Use"
               onAction = handle {
-                val row = table.selectionModel.value.getSelectedItem
-                input.text = row.text.value
+                useSelectedRow()
               }
             }
           }
