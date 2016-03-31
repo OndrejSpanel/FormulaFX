@@ -8,8 +8,9 @@ import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
-import scalafx.Includes._
+import scalafx.Includes.{function12jfxCallback => _, _}
 import scalafx.scene.control.cell.TextFieldTableCell
+import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.BorderPane
 import scalafx.util.converter.DefaultStringConverter
 
@@ -40,20 +41,24 @@ object FormulaFX extends JFXApp {
             sortable = false
             cellValueFactory = {_.getValue.text}
 
-            //cellFactory = TextFieldTableCell.forTableColumn[TableRow]()
-            def factory(x: TableColumn[TableRowText, String]) = new TextFieldTableCell[TableRowText, String](new DefaultStringConverter())
-
-            cellFactory = factory _
-
-            //cellFactory = _ => new TextFieldTableCell[TableRowText, String](new DefaultStringConverter())
+            cellFactory = _ => new TextFieldTableCell[TableRowText, String](new DefaultStringConverter()) {
+              onMouseClicked = (me: MouseEvent) => {
+                if (me.button == MouseButton.PRIMARY && me.clickCount == 2) {
+                  useSelectedRow()
+                }
+              }
+            }
           }
 
+          def useSelectedRow(): Unit = {
+            val row = table.selectionModel.value.getSelectedItem
+            input.text = row.text.value
+          }
           contextMenu = new ContextMenu {
             items += new MenuItem {
               text = "Use"
               onAction = handle {
-                val row = table.selectionModel.value.getSelectedItem
-                input.text = row.text.value
+                useSelectedRow()
               }
             }
           }
