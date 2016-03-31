@@ -48,9 +48,11 @@ object Evaluate {
       case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) + sec.toDouble * (1.0 / 3600) format Seconds
     }
 
+    def hexNum: Parser[Number] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
+
     def variable: Parser[Number] = ident ^^ { x => variables(x) }
     def fNumber: Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
-    def number: Parser[Number] = minutesAndSeconds | minutes | fNumber
+    def number: Parser[Number] = minutesAndSeconds | minutes | hexNum | fNumber
     def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
 
 
