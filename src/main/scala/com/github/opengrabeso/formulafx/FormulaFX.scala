@@ -10,7 +10,7 @@ import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
 import scalafx.Includes.{function12jfxCallback => _, _}
 import scalafx.scene.input.{MouseButton, MouseEvent}
-import scalafx.scene.layout.BorderPane
+import scalafx.scene.layout.{BorderPane, VBox}
 
 case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
@@ -25,7 +25,34 @@ object FormulaFX extends JFXApp {
     val tableData = ObservableBuffer[TableRowText]()
 
     scene = new Scene {
+      val result = new TextField {
+        editable = false
+      }
+      val input = new TextField {
+        editable = true
+        Platform.runLater(requestFocus())
+
+        onAction = handle {
+          val resultText = Evaluate(text.value)
+          resultText.map { res =>
+            tableData.add(new TableRowText(text.value))
+            tableData.add(new TableRowText("  " + res))
+            text = ""
+          }
+        }
+
+        text.onChange {
+          val resultText = Evaluate(text.value)
+          resultText.map { res =>
+            result.text = res
+          }
+          ()
+        }
+
+      }
+
       val pane = new BorderPane {
+
         val results = new TableView[TableRowText](tableData) { table =>
           editable = false
 
@@ -63,34 +90,8 @@ object FormulaFX extends JFXApp {
           }
         }
 
-        val result = new TextField {
-          editable = false
-        }
-        val input = new TextField {
-          editable = true
-          Platform.runLater(requestFocus())
-
-          onAction = handle {
-            val resultText = Evaluate(text.value)
-            resultText.map { res =>
-              tableData.add(new TableRowText(text.value))
-              tableData.add(new TableRowText("  " + res))
-              text = ""
-            }
-          }
-
-          text.onChange {
-            val resultText = Evaluate(text.value)
-            resultText.map { res =>
-              result.text = res
-            }
-            ()
-          }
-
-        }
-        top = results
-        center = input
-        bottom = result
+        center = results
+        bottom = new VBox(input, result)
 
       }
 
