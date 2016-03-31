@@ -41,6 +41,7 @@ object FormulaFX extends JFXApp {
             tableData.add(new TableRowText(text.value))
             tableData.add(new TableRowText("  " + res))
             text = ""
+            result.text = ""
           }
         }
 
