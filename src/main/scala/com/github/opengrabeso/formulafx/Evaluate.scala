@@ -20,7 +20,23 @@ object Evaluate {
 
     def parseFunctionName: Parser[Function] =
       "sin" ^^^ Math.sin _ |
-      "cos" ^^^ Math.cos _
+        "cos" ^^^ Math.cos _ |
+        "tan" ^^^ Math.tan _ |
+        "asin" ^^^ Math.asin _ |
+        "acos" ^^^ Math.acos _ |
+        "atan" ^^^ Math.atan _ |
+        "exp" ^^^ Math.exp _ |
+        "ln" ^^^ Math.log _ |
+        "log" ^^^ Math.log10 _ |
+        "sqrt" ^^^ Math.sqrt _ |
+        "floor" ^^^ Math.floor _ |
+        "ceil" ^^^ Math.ceil _ |
+        "round" ^^^ {(x : Double) => Math.round(x).toDouble} |
+        "abs" ^^^ {(x : Double) => Math.abs(x) } |
+        "signum" ^^^ {(x : Double) => Math.signum(x) } |
+        "sinh" ^^^ Math.sinh _ |
+        "cosh" ^^^ Math.cosh _ |
+        "tanh" ^^^ Math.tanh _
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
 
