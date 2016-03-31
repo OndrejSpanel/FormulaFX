@@ -29,10 +29,22 @@ object FormulaFX extends JFXApp {
 
     def clearTable(): Unit = tableData.clear()
 
+    private def rowId(i: Int) = s"row$i"
 
     def saveSession(): Unit = {
+      val oldSize = prefs.getInt("rows", 0)
       prefs.put("version", "0")
+      prefs.putInt("rows", tableData.size)
+      tableData.zipWithIndex.foreach {
+        case (row,i) =>
+          prefs.put(rowId(i), row.text.value)
+          println(s"Save ${rowId(i)} ${row.text.value}")
+      }
+      for (i <- tableData.size until oldSize) {
+        prefs.remove(rowId(i))
+      }
     }
+
 
     def loadSession(): Unit = {
       val version = prefs.get("version", "")
