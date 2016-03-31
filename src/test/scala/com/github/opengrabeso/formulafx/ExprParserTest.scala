@@ -43,6 +43,14 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("1:30") should === (res(1.5))
   }
 
+  it should "output minutes as minutes" in {
+    Evaluate.ExprParser("1:30+0:10").get.toString shouldBe "1:40"
+  }
+
+  it should "output hex as hex" in {
+    Evaluate.ExprParser("0x11+0x11").get.toString shouldBe "0x22"
+  }
+
   it should "parse minutes and seconds" in {
     Evaluate.ExprParser("1:30:30") should === (res(1.5 + 30.0/3600))
   }
@@ -71,10 +79,10 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
   }
 
   it should "parse valid hexadecimal numbers" in {
-    Evaluate.ExprParser("0x11") shouldBe res(17)
-    Evaluate.ExprParser("0XF0") shouldBe res(240)
-    Evaluate.ExprParser("0xff") shouldBe res(255)
-    Evaluate.ExprParser("0xA1") shouldBe res(161)
+    Evaluate.ExprParser("0x11").get.x shouldBe 0x11
+    Evaluate.ExprParser("0XF0").get.x shouldBe 0xf0
+    Evaluate.ExprParser("0xff").get.x shouldBe 0xff
+    Evaluate.ExprParser("0xA1").get.x shouldBe 0xa1
   }
 
   it should "reject invalid hexadecimal numbers" in {

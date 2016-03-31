@@ -10,6 +10,10 @@ object Format {
     def score = 10
   }
 
+  object Hex extends Format {
+    def score = 15
+  }
+
   object Minutes extends Format {
     def score = 20
   }
@@ -134,6 +138,15 @@ object Number {
     else toSecondsPos(+x)
   }
 
+  def toHex(x: Double) = {
+    // TODO: scientific and fractional hex formats
+    if (x.round != x) {
+      x.toString
+    } else {
+      f"0x${x.round}%x"
+    }
+  }
+
 }
 
 case class Number(x: Double, f: Format) {
@@ -144,6 +157,7 @@ case class Number(x: Double, f: Format) {
   override def toString = f match {
     case Minutes => toMinutes(x)
     case Seconds => toSeconds(x)
+    case Hex => toHex(x)
     case _ => x.toString
   }
 }
