@@ -40,7 +40,8 @@ object Evaluate {
         functionDouble("signum", Math.signum) |
         function("sinh", Math.sinh) |
         function("cosh", Math.cosh) |
-        function("tanh", Math.tanh)
+        function("tanh", Math.tanh) |
+        function("hex", x => Number(x, Hex))
 
     def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
 
