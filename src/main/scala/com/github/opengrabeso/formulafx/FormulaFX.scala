@@ -12,7 +12,7 @@ import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
 import scalafx.scene.control.Menu._
 import scalafx.Includes.{function12jfxCallback => _, _}
-import scalafx.scene.input.{MouseButton, MouseEvent}
+import scalafx.scene.input.{KeyCharacterCombination, KeyCombination, MouseButton, MouseEvent}
 import scalafx.scene.layout.{BorderPane, VBox}
 
 case class TableRowText(t: String) {
@@ -95,6 +95,7 @@ object FormulaFX extends JFXApp {
         menus add new Menu("File") {
           items = Seq(
             new MenuItem("Clear history") {
+              accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
               onAction = handle {clearTable()}
             }
           )
