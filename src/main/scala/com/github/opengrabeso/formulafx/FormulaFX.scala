@@ -1,5 +1,7 @@
 package com.github.opengrabeso.formulafx
 
+import java.util.prefs.Preferences
+
 import scalafx.application.Platform
 import scalafx.collections.ObservableBuffer
 import scalafx.application.JFXApp
@@ -19,13 +21,27 @@ case class TableRowText(t: String) {
 
 //noinspection ForwardReference
 object FormulaFX extends JFXApp {
+  def prefs: Preferences = Preferences.userRoot().node(getClass.getPackage.getName.toLowerCase)
   stage = new JFXApp.PrimaryStage {
     title.value = "Formula Fx - Expression Calculator"
-
 
     val tableData = ObservableBuffer[TableRowText]()
 
     def clearTable(): Unit = tableData.clear()
+
+
+    def saveSession(): Unit = {
+      prefs.put("version", "0")
+    }
+
+    def loadSession(): Unit = {
+      val version = prefs.get("version", "")
+      if (version.nonEmpty) {
+
+      }
+    }
+
+    loadSession()
 
     scene = new Scene {
       val result = new TextField {
@@ -42,6 +58,7 @@ object FormulaFX extends JFXApp {
             tableData.add(new TableRowText("  " + res))
             text = ""
             result.text = ""
+            saveSession()
           }
         }
 
