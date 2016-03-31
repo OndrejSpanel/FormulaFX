@@ -16,10 +16,11 @@ object Evaluate {
 
   object ExprParser extends JavaTokenParsers {
     type Operator = (Double, Double) => Double
-    type Function = Double => Double
+    type Function = Double => Number
 
     def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
     def function[T](p: Parser[T], v: => Function): Parser[Function] = p ^^^ v
+    def functionDouble[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(v(x), General)}
 
     def parseFunctionName: Parser[Function] =
         function("sin", Math.sin) |
@@ -34,9 +35,9 @@ object Evaluate {
         function("sqrt", Math.sqrt) |
         function("floor", Math.floor) |
         function("ceil", Math.ceil) |
-        function("round", x => Math.round(x)) |
-        function("abs", Math.abs) |
-        function("signum", Math.signum) |
+        functionDouble("round", x => Math.round(x)) |
+        functionDouble("abs", Math.abs) |
+        functionDouble("signum", Math.signum) |
         function("sinh", Math.sinh) |
         function("cosh", Math.cosh) |
         function("tanh", Math.tanh)
