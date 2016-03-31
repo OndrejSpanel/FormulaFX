@@ -62,4 +62,17 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
   it should "fail when calling an undefined function" in {
     Evaluate.ExprParser("unknown(10)") shouldBe a[Failure[_]]
   }
+
+  it should "parse valid hexadecimal numbers" in {
+    Evaluate.ExprParser("0x11") shouldBe res(17)
+    Evaluate.ExprParser("0XF0") shouldBe res(240)
+    Evaluate.ExprParser("0xff") shouldBe res(255)
+    Evaluate.ExprParser("0xA1") shouldBe res(161)
+  }
+
+  it should "reject invalid hexadecimal numbers" in {
+    Evaluate.ExprParser("0x1Z") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("0x ff") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("0xxff") shouldBe a[Failure[_]]
+  }
 }
