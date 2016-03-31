@@ -1,6 +1,6 @@
 name := "FormulaFX"
 
-version := "0.0.2-alpha"
+version := "0.0.3-alpha"
 
 scalaVersion := "2.11.8"
 
