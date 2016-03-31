@@ -8,6 +8,7 @@ import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
+import scalafx.scene.control.Menu._
 import scalafx.Includes.{function12jfxCallback => _, _}
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{BorderPane, VBox}
@@ -23,6 +24,8 @@ object FormulaFX extends JFXApp {
 
 
     val tableData = ObservableBuffer[TableRowText]()
+
+    def clearTable(): Unit = tableData.clear()
 
     scene = new Scene {
       val result = new TextField {
@@ -49,6 +52,17 @@ object FormulaFX extends JFXApp {
           ()
         }
 
+      }
+
+      val menuBar = new MenuBar {
+        useSystemMenuBar = true
+        menus add new Menu("File") {
+          items = Seq(
+            new MenuItem("Clear history") {
+              onAction = handle {clearTable()}
+            }
+          )
+        }
       }
 
       val pane = new BorderPane {
@@ -90,6 +104,7 @@ object FormulaFX extends JFXApp {
           }
         }
 
+        top = menuBar
         center = results
         bottom = new VBox(input, result)
 
