@@ -62,6 +62,13 @@ object FormulaFX extends JFXApp {
     loadSession()
 
     scene = new Scene {
+      def computeResult(): Unit = {
+        val resultText = Evaluate(input.text.value)
+        resultText.map { res =>
+          result.text = res
+        }
+      }
+
       val result = new TextFieldAcceleratorFix {
         editable = false
       }
@@ -80,24 +87,24 @@ object FormulaFX extends JFXApp {
           }
         }
 
-        text.onChange {
-          val resultText = Evaluate(text.value)
-          resultText.map { res =>
-            result.text = res
-          }
-          ()
-        }
+        text.onChange { computeResult()}
 
       }
       val statusBar = new Label
 
+      def changeSettings(change: => Unit): Unit = {
+        change
+        showStatus()
+        computeResult()
+
+      }
       private val menuRadian = new CheckMenuItem("Radian") {
         accelerator = new KeyCodeCombination(KeyCode.F9)
-        onAction = handle {Evaluate.angleUnitRadian(); showStatus()}
+        onAction = handle {changeSettings{Evaluate.angleUnitRadian()}}
       }
       private val menuDegree = new CheckMenuItem("Degree") {
         accelerator = new KeyCodeCombination(KeyCode.F10)
-        onAction = handle {Evaluate.angleUnitDegree(); showStatus()}
+        onAction = handle {changeSettings{Evaluate.angleUnitDegree()}}
       }
 
       val menuBar = new MenuBar {

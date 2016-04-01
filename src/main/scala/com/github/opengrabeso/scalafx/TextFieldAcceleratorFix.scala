@@ -6,7 +6,9 @@ import scalafx.scene.input.{KeyCodeCombination, KeyEvent}
 
 class TextFieldAcceleratorFix extends TextField {
   onKeyReleased = { e: KeyEvent =>
-    val toRun = Option(scene.value.accelerators(new KeyCodeCombination(e.code)))
-    toRun.foreach(_.run())
+    if (!e.code.isModifierKey) {
+      val toRun = Option(scene.value.accelerators.get(new KeyCodeCombination(e.code)))
+      toRun.foreach(_.run())
+    }
   }
 }
