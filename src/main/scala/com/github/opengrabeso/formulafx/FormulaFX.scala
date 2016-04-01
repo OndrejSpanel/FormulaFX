@@ -10,10 +10,10 @@ import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
-import scalafx.scene.control.Menu._
 import scalafx.Includes.{function12jfxCallback => _, _}
 import scalafx.scene.input._
 import scalafx.scene.layout.{BorderPane, VBox}
+import com.github.opengrabeso.scalafx.TextFieldAcceleratorFix
 
 case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
@@ -62,10 +62,10 @@ object FormulaFX extends JFXApp {
     loadSession()
 
     scene = new Scene {
-      val result = new TextField {
+      val result = new TextFieldAcceleratorFix {
         editable = false
       }
-      val input = new TextField {
+      val input = new TextFieldAcceleratorFix {
         editable = true
         Platform.runLater(requestFocus())
 
