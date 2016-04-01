@@ -10,10 +10,10 @@ import scalafx.scene.Scene
 import scalafx.scene.control._
 import scalafx.scene.control.TableColumn._
 import scalafx.scene.control.MenuItem._
-import scalafx.scene.control.Menu._
 import scalafx.Includes.{function12jfxCallback => _, _}
-import scalafx.scene.input.{KeyCharacterCombination, KeyCombination, MouseButton, MouseEvent}
+import scalafx.scene.input._
 import scalafx.scene.layout.{BorderPane, VBox}
+import com.github.opengrabeso.scalafx.TextFieldAcceleratorFix
 
 case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
@@ -62,10 +62,17 @@ object FormulaFX extends JFXApp {
     loadSession()
 
     scene = new Scene {
-      val result = new TextField {
+      def computeResult(): Unit = {
+        val resultText = Evaluate(input.text.value)
+        resultText.map { res =>
+          result.text = res
+        }
+      }
+
+      val result = new TextFieldAcceleratorFix {
         editable = false
       }
-      val input = new TextField {
+      val input = new TextFieldAcceleratorFix {
         editable = true
         Platform.runLater(requestFocus())
 
@@ -80,26 +87,51 @@ object FormulaFX extends JFXApp {
           }
         }
 
-        text.onChange {
-          val resultText = Evaluate(text.value)
-          resultText.map { res =>
-            result.text = res
-          }
-          ()
-        }
+        text.onChange { computeResult()}
 
+      }
+      val statusBar = new Label
+
+      def changeSettings(change: => Unit): Unit = {
+        change
+        showStatus()
+        computeResult()
+
+      }
+      private val menuRadian = new CheckMenuItem("Radian") {
+        accelerator = new KeyCodeCombination(KeyCode.F9)
+        onAction = handle {changeSettings{Evaluate.angleUnitRadian()}}
+      }
+      private val menuDegree = new CheckMenuItem("Degree") {
+        accelerator = new KeyCodeCombination(KeyCode.F10)
+        onAction = handle {changeSettings{Evaluate.angleUnitDegree()}}
       }
 
       val menuBar = new MenuBar {
         useSystemMenuBar = true
-        menus add new Menu("File") {
-          items = Seq(
-            new MenuItem("Clear history") {
-              accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
-              onAction = handle {clearTable()}
-            }
-          )
-        }
+        menus = Seq(
+          new Menu("File") {
+            items = Seq(
+              new MenuItem("Clear history") {
+                accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
+                onAction = handle {clearTable()}
+              }
+            )
+          },
+          new Menu("Settings") {
+            items = Seq(
+              new Menu("Angle unit") {
+                items = Seq(menuRadian, menuDegree)
+              }
+            )
+          }
+        )
+      }
+
+      def showStatus(): Unit = {
+        statusBar.text.value = Evaluate.angleUnitName
+        menuDegree.selected = Evaluate.angleUnitIsDegree
+        menuRadian.selected = Evaluate.angleUnitIsRadian
       }
 
       val pane = new BorderPane {
@@ -143,11 +175,12 @@ object FormulaFX extends JFXApp {
 
         top = menuBar
         center = results
-        bottom = new VBox(input, result)
+        bottom = new VBox(input, result, statusBar)
 
       }
 
       root = pane
+      showStatus()
 
     }
   }
