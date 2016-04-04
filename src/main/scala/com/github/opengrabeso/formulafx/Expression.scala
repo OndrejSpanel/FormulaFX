@@ -19,12 +19,12 @@ object AngleUnit {
 }
 
 object Expression {
-  type Variables = PartialFunction[String, Number]
+  type Variables = Map[String, Number]
 }
 
 import Expression._
 
-case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean, variables: Variables)
+case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean, var variables: Variables)
 
 trait Expression {
   expr =>
@@ -73,7 +73,7 @@ trait Expression {
   }
 
   def solveWithUnknown(left: Item, right: Item, unknownName: String)(implicit settings: ExpressionSettings): (Item, Item) = {
-    val settingsWithUnknown = settings.copy(variables = { case name if name!=unknownName => settings.variables.apply(name)})
+    val settingsWithUnknown = settings.copy(variables = settings.variables - unknownName)
     solve(left, right)(settingsWithUnknown)
   }
 

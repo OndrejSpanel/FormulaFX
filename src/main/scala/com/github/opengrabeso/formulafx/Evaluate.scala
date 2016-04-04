@@ -103,7 +103,7 @@ object Evaluate {
           case VariableItem(varName) =>
             val res = xSolved.value
             if (!settings.preview) {
-              variableStore += (varName -> res)
+              settings.variables += (varName -> res)
             }
             res
           case _ =>
@@ -122,7 +122,7 @@ object Evaluate {
   }
 
   object ExprParser extends ExprParser()(
-    new ExpressionSettings(AngleUnit.Radian, false, PartialFunction.empty)
+    new ExpressionSettings(AngleUnit.Radian, false, Map.empty)
   )
 
   def compute(input: String, preview: Boolean): Try[String] = {
