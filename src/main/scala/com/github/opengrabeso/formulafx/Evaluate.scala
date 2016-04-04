@@ -32,35 +32,43 @@ object Evaluate {
   class ExprParser()(implicit val settings: ExpressionSettings) extends JavaTokenParsers with Expression {
 
     type Operator = Expression.Operator
-    type Function = Double => Number
+    type Function = Expression.Function
 
     def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
     def function[T](p: Parser[T], v: => Function): Parser[Function] = p ^^^ v
 
-    def functionDouble[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(v(x), General)}
-    def functionParAngle[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(v(angleToRadians(x)), General)}
-    def functionRetAngle[T](p: Parser[T], v: => Double => Double): Parser[Function] = p ^^^ {x => Number(angleFromRadians(v(x)), General)}
+    def funcParAngle(v: Function): Function = new Function {
+      override def apply(v1: Double): Number = v.apply(angleToRadians(v1))
+      override def inverse(ret: Double): Double = angleFromRadians(v.inverse(ret))
+    }
+    def funcRetAngle(v: Function): Function = new Function {
+      override def apply(v1: Double): Number = angleFromRadians(v.apply(v1).x)
+      override def inverse(ret: Double): Double = v.inverse(angleToRadians(ret))
+    }
+
+    def functionParAngle[T](p: Parser[T], v: Function): Parser[Function] = p ^^^ funcParAngle(v)
+    def functionRetAngle[T](p: Parser[T], v: Function): Parser[Function] = p ^^^ funcRetAngle(v)
 
     def parseFunctionName: Parser[Function] =
-      functionParAngle("sin", Math.sin) |
-        functionParAngle("cos", Math.cos) |
-        functionParAngle("tan", Math.tan) |
-        functionRetAngle("asin", Math.asin) |
-        functionRetAngle("acos", Math.acos) |
-        functionRetAngle("atan", Math.atan) |
-        functionParAngle("sinh", Math.sinh) |
-        functionParAngle("cosh", Math.cosh) |
-        functionParAngle("tanh", Math.tanh) |
-        function("exp", Math.exp) |
-        function("ln", Math.log) |
-        function("log", Math.log10) |
-        function("sqrt", Math.sqrt) |
-        function("floor", Math.floor) |
-        function("ceil", Math.ceil) |
-        functionDouble("round", x => Math.round(x)) |
-        functionDouble("abs", Math.abs) |
-        functionDouble("signum", Math.signum) |
-        function("hex", x => Number(x, Hex))
+      function("exp", Expression.function_exp) |
+        function("ln", Expression.function_ln) |
+        functionParAngle("sin", Expression.function_sin) |
+        functionParAngle("cos", Expression.function_cos) |
+        functionParAngle("tan", Expression.function_tan) |
+        functionRetAngle("asin", Expression.function_asin) |
+        functionRetAngle("acos", Expression.function_acos) |
+        functionRetAngle("atan", Expression.function_atan) |
+        function("sqrt", Expression.function_sqrt) |
+        function("log", Expression.function_log) |
+        function("floor", Expression.function_floor) |
+        function("ceil", Expression.function_ceil) |
+        function("round", Expression.function_round) |
+        function("signum", Expression.function_signum) |
+        function("abs", Expression.function_abs) |
+        functionParAngle("sinh", Expression.function_sinh) |
+        functionParAngle("cosh", Expression.function_cosh) |
+        functionParAngle("tanh", Expression.function_tanh) |
+        function("hex", Expression.function_hex)
 
     def function: Parser[FunctionItem] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => new FunctionItem(f, x) }
 

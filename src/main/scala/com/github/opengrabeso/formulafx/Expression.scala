@@ -1,5 +1,8 @@
 package com.github.opengrabeso.formulafx
 
+import Format._
+
+import scala.language.implicitConversions
 
 sealed trait AngleUnit {
   def toRadians(x: Double): Double
@@ -47,6 +50,80 @@ object Expression {
     override def inverseLeft(ret: Double, v1: Double) = v1 / ret
     override def inverseRight(ret: Double, v1: Double) = ret * v1
   }
+
+  trait Function extends (Double => Number) {
+    def inverse(ret: Double): Double
+  }
+
+  class FunctionNoInverse(f: Double => Number) extends Function {
+    def apply(v1: Double) = f(v1)
+    def inverse(ret: Double): Double = throw new UnsupportedOperationException("Unable to invert function")
+  }
+
+  implicit def doubleToNumber(x: Double): Number = Number(x, General)
+
+  object function_sin extends Function {
+    override def apply(v1: Double) = Math.sin(v1)
+    override def inverse(ret: Double) = Math.asin(ret)
+  }
+  object function_cos extends Function {
+    override def apply(v1: Double) = Math.cos(v1)
+    override def inverse(ret: Double) = Math.acos(ret)
+  }
+  object function_tan extends Function {
+    override def apply(v1: Double) = Math.tan(v1)
+    override def inverse(ret: Double) = Math.atan(ret)
+  }
+  object function_asin extends Function {
+    override def apply(v1: Double) = Math.asin(v1)
+    override def inverse(ret: Double) = Math.sin(ret)
+  }
+  object function_acos extends Function {
+    override def apply(v1: Double) = Math.acos(v1)
+    override def inverse(ret: Double) = Math.cos(ret)
+  }
+  object function_atan extends Function {
+    override def apply(v1: Double) = Math.atan(v1)
+    override def inverse(ret: Double) = Math.tan(ret)
+  }
+
+  object function_exp extends Function {
+    override def apply(v1: Double) = Math.exp(v1)
+    override def inverse(ret: Double) = Math.log(ret)
+  }
+  object function_ln extends Function {
+    override def apply(v1: Double) = Math.log(v1)
+    override def inverse(ret: Double) = Math.exp(ret)
+  }
+
+  object function_log extends Function {
+    override def apply(v1: Double) = Math.log10(v1)
+    override def inverse(ret: Double) = Math.pow(10, ret)
+  }
+
+  object function_sqrt extends Function {
+    override def apply(v1: Double) = Math.sqrt(v1)
+    override def inverse(ret: Double) = ret * ret
+  }
+
+  object function_abs extends Function {
+    override def apply(v1: Double) = Math.abs(v1)
+    override def inverse(ret: Double) = ret
+  }
+
+  object function_floor extends FunctionNoInverse(Math.floor)
+  object function_ceil extends FunctionNoInverse(Math.ceil)
+  object function_round extends FunctionNoInverse(Math.round(_).toDouble)
+  object function_signum extends FunctionNoInverse(x => Math.signum(x))
+
+  object function_sinh extends FunctionNoInverse(Math.sinh)
+  object function_cosh extends FunctionNoInverse(Math.cosh)
+  object function_tanh extends FunctionNoInverse(Math.tanh)
+
+  object function_hex extends Function {
+    override def apply(v1: Double) = Number(v1, Hex)
+    override def inverse(ret: Double) = ret
+  }
 }
 
 import Expression._
@@ -86,7 +163,7 @@ trait Expression {
     def leftmostVariable = left.leftmostVariable orElse right.leftmostVariable
   }
 
-  case class FunctionItem(f: Double => Number, x: Item) extends Item {
+  case class FunctionItem(f: Function, x: Item) extends Item {
     def value(implicit settings: ExpressionSettings) = {
       val par = x.value
       f(par.x) // TODO: some functions should respect input format
@@ -109,6 +186,10 @@ trait Expression {
           case (false, false) => throw new UnsupportedOperationException("Two unknowns encountered")
         }
         solveLeftUnknown(newLeft, newRight)
+      case FunctionItem(f, x) =>
+        assert(!x.isConstant)
+        val newRight = f.inverse(right.x)
+        solveLeftUnknown(x, newRight)
       case _ =>
         (left, right)
     }

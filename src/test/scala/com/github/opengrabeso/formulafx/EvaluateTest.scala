@@ -39,9 +39,13 @@ class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
     eval("a=b") shouldBe a[Failure[_]]
   }
 
+  private def computeEquation(eq: String) = {
+    val eval = createEvaluator
+    eval(eq)
+  }
   private def testEquation(eq: String, unknown: String, result: Double): Unit = {
     val eval = createEvaluator
-    eval(eq) shouldBe res(result)
+    eval(eq)
     eval.settings.variables(unknown).x shouldBe result
   }
 
@@ -53,5 +57,19 @@ class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
     testEquation("1+2 = a-2", "a", 5)
     testEquation("1+2 = a/2", "a", 6)
     testEquation("(1+2)*3 = 6/((2/a)/3)", "a", 1)
+  }
+
+  it should "solve equations with formatted numbers" in {
+    testEquation("a * 0x11 = 0x88", "a", 8)
+  }
+
+  it should "invert functions" in {
+    testEquation("sqrt(a) = 2", "a", 4)
+    testEquation("cos(a) = 1", "a", 0)
+  }
+
+  it should "not invert non-inversible functions" in {
+    computeEquation("round(x) = 0") shouldBe a[Failure[_]]
+    computeEquation("ceil(x) = 0") shouldBe a[Failure[_]]
   }
 }
