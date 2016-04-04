@@ -20,8 +20,9 @@ object AngleUnit {
 
 case class ExpressionSettings(angleUnit: AngleUnit)
 
-trait Variables {
+trait Variables extends PartialFunction[String, Number] {
   def apply(name: String): Number
+  def isDefinedAt(name: String): Boolean
 }
 
 trait Expression {
@@ -29,18 +30,21 @@ trait Expression {
   def settings: ExpressionSettings
 
   sealed trait Item {
+    def isConstant: Boolean
     def value: Number
   }
 
-  class VariableItem(name: String) extends Item {
+  case class VariableItem(name: String) extends Item {
+    def isConstant = variables.isDefinedAt(name)
     def value = variables(name)
   }
 
-  class LiteralItem(number: Number) extends Item {
+  case class LiteralItem(number: Number) extends Item {
     def value = number
+    def isConstant = true
   }
 
-  class OperatorItem(op: (Double, Double) => Double, left: Item, right: Item) extends Item {
+  case class OperatorItem(op: (Double, Double) => Double, left: Item, right: Item) extends Item {
     def value = {
       val valueL = left.value
       val valueR = right.value
@@ -48,12 +52,19 @@ trait Expression {
       val retFormat = valueL combineFormat valueR
       Number(retValue, retFormat)
     }
+    def isConstant = left.isConstant && right.isConstant
   }
 
-  class FunctionItem(f: Double => Number, x: Item) extends Item {
+  case class FunctionItem(f: Double => Number, x: Item) extends Item {
     def value = {
       val par = x.value
       f(par.x) // TODO: some functions should respect input format
     }
+    def isConstant = x.isConstant
   }
+
+  def solve(left: Item, right: Item): (Item, Item) = {
+    left -> right
+  }
+
 }

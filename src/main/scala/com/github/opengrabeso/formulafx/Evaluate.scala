@@ -30,8 +30,9 @@ object Evaluate {
 
   object ExprParser extends JavaTokenParsers with Expression {
 
-    override val variables = new Variables{
+    override val variables = new Variables {
       override def apply(name: String) = variableStore(name)
+      override def isDefinedAt(name: String) = variableStore.isDefinedAt(name)
     }
     override val settings = new ExpressionSettings(angleUnit)
 
@@ -100,11 +101,17 @@ object Evaluate {
 
     def expr: Parser[Item] = term ~ rep(addOperators ~ term) ^^ processOperators
 
-    def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
+    def assign: Parser[Number] = (expr <~ "=") ~ expr ^^ {
       case i ~ x =>
-        val res = x.value
-        variableStore += (i -> res)
-        res
+        val (iSolved, xSolved) = solve(i, x)
+        iSolved match {
+          case VariableItem(varName) =>
+            val res = xSolved.value
+            variableStore += (varName -> res)
+            res
+          case _ =>
+            throw new UnsupportedOperationException("Unable to solve equation")
+        }
     }
 
     def evaluateExpr: Parser[Number] = expr ^^ {_.value}
