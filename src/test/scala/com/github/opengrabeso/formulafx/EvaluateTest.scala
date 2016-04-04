@@ -61,6 +61,7 @@ class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
 
   it should "solve equations with formatted numbers" in {
     testEquation("a * 0x11 = 0x88", "a", 8)
+    testEquation("a * 1:30 = 3", "a", 2)
   }
 
   it should "invert functions" in {
