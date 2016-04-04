@@ -108,7 +108,7 @@ object Expression {
 
   object function_abs extends Function {
     override def apply(v1: Double) = Math.abs(v1)
-    override def inverse(ret: Double) = ret
+    override def inverse(ret: Double) = if (ret<0) throw new UnsupportedOperationException("Abs cannot be negative") else ret
   }
 
   object function_floor extends FunctionNoInverse(Math.floor)
