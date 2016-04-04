@@ -73,10 +73,7 @@ trait Expression {
   }
 
   def solveWithUnknown(left: Item, right: Item, unknownName: String)(implicit settings: ExpressionSettings): (Item, Item) = {
-    val settingsWithUnknown = settings.copy(variables = new Variables {
-      override def isDefinedAt(name: String) = name != unknownName && settings.variables.isDefinedAt(name)
-      override def apply(name: String) = settings.variables.apply(name)
-    })
+    val settingsWithUnknown = settings.copy(variables = { case name if name!=unknownName => settings.variables.apply(name)})
     solve(left, right)(settingsWithUnknown)
   }
 
