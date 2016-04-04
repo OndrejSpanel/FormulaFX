@@ -13,7 +13,7 @@ object Evaluate {
     def format(f: Format) = Number(x, f)
   }
 
-  private var variables = Map[String, Number]()
+  private var variableStore = Map[String, Number]()
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
 
@@ -28,7 +28,13 @@ object Evaluate {
   def angleToRadians(x: Double) = angleUnit.toRadians(x)
   def angleFromRadians(x: Double) = angleUnit.fromRadians(x)
 
-  object ExprParser extends JavaTokenParsers {
+  object ExprParser extends JavaTokenParsers with Expression {
+
+    override val variables = new Variables{
+      override def apply(name: String) = variableStore(name)
+    }
+    override val settings = new ExpressionSettings(angleUnit)
+
     type Operator = (Double, Double) => Double
     type Function = Double => Number
 
@@ -60,46 +66,50 @@ object Evaluate {
         functionDouble("signum", Math.signum) |
         function("hex", x => Number(x, Hex))
 
-    def function: Parser[Number] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => f(x.x) }
+    def function: Parser[FunctionItem] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => new FunctionItem(f, x) }
 
-    def minutes: Parser[Number] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
-    def minutesAndSeconds: Parser[Number] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
+    implicit def numberToItem(x: Number): LiteralItem = new LiteralItem(x)
+    implicit def doubleToItem(x: Double): LiteralItem = new LiteralItem(Number(x, General))
+
+    def minutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
+    def minutesAndSeconds: Parser[LiteralItem] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
       case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) + sec.toDouble * (1.0 / 3600) format Seconds
     }
 
-    def hexNum: Parser[Number] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
+    def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
 
-    def variable: Parser[Number] = ident ^^ { x => variables(x) }
-    def fNumber: Parser[Number] = floatingPointNumber ^^ { x => x.toDouble }
-    def number: Parser[Number] = minutesAndSeconds | minutes | hexNum | fNumber
-    def factor: Parser[Number] = (number | function | variable) | "(" ~> expr <~ ")"
+    def variable: Parser[VariableItem] = ident ^^ { x => new VariableItem(x) }
+    def fNumber: Parser[LiteralItem] = floatingPointNumber ^^ { x => x.toDouble }
+    def number: Parser[LiteralItem] = minutesAndSeconds | minutes | hexNum | fNumber
+    def factor: Parser[Item] = (number | function | variable) | "(" ~> expr <~ ")"
 
 
-    def mulOperators: Parser[Operator] =
+    def mulOperators =
       operator("*" , _ * _) |
       operator("/" , _ / _)
 
-    def addOperators: Parser[Operator] =
+    def addOperators =
       operator("+", _ + _) |
       operator("-", _ - _)
 
-    def callOperator(o: Operator, a: Number, b: Number): Number = Number(o(a.x, b.x), a combineFormat b)
-
-    def processOperators: Number ~ List[Operator ~  Number] => Number = {
-      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => callOperator(op, x, y) }
+    def processOperators: Item ~ List[Operator ~  Item] => Item = {
+      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => new OperatorItem(op, x, y) }
     }
 
-    def term: Parser[Number] = factor ~ rep(mulOperators ~ factor) ^^ processOperators
+    def term: Parser[Item] = factor ~ rep(mulOperators ~ factor) ^^ processOperators
 
-    def expr: Parser[Number] = term ~ rep(addOperators ~ term) ^^ processOperators
+    def expr: Parser[Item] = term ~ rep(addOperators ~ term) ^^ processOperators
 
     def assign: Parser[Number] = (ident <~ "=") ~ expr ^^ {
       case i ~ x =>
-        variables += (i -> x)
-        x
+        val res = x.value
+        variableStore += (i -> res)
+        res
     }
 
-    def command = assign | expr
+    def evaluateExpr: Parser[Number] = expr ^^ {_.value}
+
+    def command = assign | evaluateExpr
 
     def apply(input: String): Try[Number] = Try {parseAll(command, input)}.map {
       case Success(result, _) => result

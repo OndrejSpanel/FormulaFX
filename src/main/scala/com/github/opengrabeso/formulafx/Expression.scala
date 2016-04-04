@@ -24,21 +24,23 @@ trait Variables {
   def apply(name: String): Number
 }
 
-class Expression(variables: Variables, settings: ExpressionSettings) {
+trait Expression {
+  def variables: Variables
+  def settings: ExpressionSettings
 
   sealed trait Item {
     def value: Number
   }
 
-  class Variable(name: String) extends Item {
+  class VariableItem(name: String) extends Item {
     def value = variables(name)
   }
 
-  class Literal(number: Number) extends Item {
+  class LiteralItem(number: Number) extends Item {
     def value = number
   }
 
-  class Operator(op: (Double, Double) => Double, left: Item, right: Item) extends Item {
+  class OperatorItem(op: (Double, Double) => Double, left: Item, right: Item) extends Item {
     def value = {
       val valueL = left.value
       val valueR = right.value
@@ -48,7 +50,7 @@ class Expression(variables: Variables, settings: ExpressionSettings) {
     }
   }
 
-  class Function(f: Double => Number, x: Item) extends Item {
+  class FunctionItem(f: Double => Number, x: Item) extends Item {
     def value = {
       val par = x.value
       f(par.x) // TODO: some functions should respect input format
