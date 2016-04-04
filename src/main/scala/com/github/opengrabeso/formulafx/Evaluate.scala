@@ -14,22 +14,6 @@ object Evaluate {
   }
 
   private var variables = Map[String, Number]()
-  sealed trait AngleUnit {
-    def toRadians(x: Double): Double
-    def fromRadians(x: Double): Double
-  }
-  object AngleUnit {
-    object Radian extends AngleUnit {
-      override def toRadians(x: Double) = x
-      override def fromRadians(x: Double) = x
-      override def toString = "Radian"
-    }
-    object Degree extends AngleUnit{
-      override def toRadians(x: Double) = x.toRadians
-      override def fromRadians(x: Double) = x.toDegrees
-      override def toString = "Degree"
-    }
-  }
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
 
