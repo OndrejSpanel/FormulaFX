@@ -19,12 +19,12 @@ object AngleUnit {
 }
 
 object Expression {
-  type Variables = Map[String, Number]
+  type Variables = collection.mutable.Map[String, Number]
 }
 
 import Expression._
 
-case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean, var variables: Variables)
+case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean, variables: Variables)
 
 trait Expression {
   expr =>

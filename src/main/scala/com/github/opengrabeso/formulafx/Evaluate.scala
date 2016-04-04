@@ -12,11 +12,11 @@ object Evaluate {
     def format(f: Format) = Number(x, f)
   }
 
-  private var variableStore = Map[String, Number]()
+  private var variableStore = collection.mutable.Map[String, Number]()
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
 
-  def clear(): Unit = {variableStore = Map()}
+  def clear(): Unit = {variableStore = collection.mutable.Map()}
 
   def angleUnitDegree(): Unit = angleUnit = AngleUnit.Degree
   def angleUnitRadian(): Unit = angleUnit = AngleUnit.Radian
@@ -122,7 +122,7 @@ object Evaluate {
   }
 
   object ExprParser extends ExprParser()(
-    new ExpressionSettings(AngleUnit.Radian, false, Map.empty)
+    new ExpressionSettings(AngleUnit.Radian, false, collection.mutable.Map.empty)
   )
 
   def compute(input: String, preview: Boolean): Try[String] = {
