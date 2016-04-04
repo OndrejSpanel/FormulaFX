@@ -22,14 +22,16 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     }
   }
 
-  "Expression parser" should "compute simple arithmetic expressions" in {
+  behavior of "Expression parser"
+
+  it should "compute simple arithmetic expressions" in {
     Evaluate.ExprParser("1") shouldBe res(1)
     Evaluate.ExprParser("1 + 2") shouldBe res(3)
     Evaluate.ExprParser("1 + 2 * 3") shouldBe res(7)
     Evaluate.ExprParser("(1 + 2) * 3") shouldBe res(9)
   }
 
-  "Expression parser" should "reject invalid expressions" in {
+  it should "reject invalid expressions" in {
     Evaluate.ExprParser("1+*2") shouldBe a[Failure[_]]
     Evaluate.ExprParser("1+)3") shouldBe a[Failure[_]]
     Evaluate.ExprParser("(1+)3") shouldBe a[Failure[_]]

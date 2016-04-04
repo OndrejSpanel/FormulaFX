@@ -31,7 +31,7 @@ object Evaluate {
 
   class ExprParser()(implicit val settings: ExpressionSettings) extends JavaTokenParsers with Expression {
 
-    type Operator = (Double, Double) => Double
+    type Operator = Expression.Operator
     type Function = Double => Number
 
     def operator[T](p: Parser[T], v: => Operator): Parser[Operator] = p ^^^ v
@@ -81,12 +81,12 @@ object Evaluate {
 
 
     def mulOperators =
-      operator("*" , _ * _) |
-      operator("/" , _ / _)
+      operator("*" , Expression.operator_*) |
+      operator("/" , Expression.operator_/)
 
     def addOperators =
-      operator("+", _ + _) |
-      operator("-", _ - _)
+      operator("+", Expression.operator_+) |
+      operator("-", Expression.operator_-)
 
     def processOperators: Item ~ List[Operator ~  Item] => Item = {
       case number ~ list => list.foldLeft(number) { case (x, op ~ y) => new OperatorItem(op, x, y) }
@@ -98,10 +98,9 @@ object Evaluate {
 
     def assign: Parser[Number] = (expr <~ "=") ~ expr ^^ {
       case i ~ x =>
-        val (iSolved, xSolved) = solve(i, x)
+        val (iSolved, res) = solve(i, x)
         iSolved match {
           case VariableItem(varName) =>
-            val res = xSolved.value
             if (!settings.preview) {
               settings.variables += (varName -> res)
             }

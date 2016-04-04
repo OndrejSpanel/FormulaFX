@@ -7,7 +7,7 @@ import scala.util.Failure
 class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
   behavior of "Evaluator with variables"
 
-  def createVariables = Map[String, Number]()
+  def createVariables = collection.mutable.Map[String, Number]()
 
   def createEvaluator = new Evaluate.ExprParser()(
     new ExpressionSettings(AngleUnit.Radian, false, createVariables)
@@ -37,5 +37,21 @@ class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
   it should "reject equation with multiple variables" in {
     val eval = createEvaluator
     eval("a=b") shouldBe a[Failure[_]]
+  }
+
+  private def testEquation(eq: String, unknown: String, result: Double): Unit = {
+    val eval = createEvaluator
+    eval(eq) shouldBe res(result)
+    eval.settings.variables(unknown).x shouldBe result
+  }
+
+  it should "solve simple equations" in {
+    testEquation("1+2 = a*3", "a", 1)
+    testEquation("1+2 = 12/a", "a", 4)
+    testEquation("1+2 = 12/(6-a)", "a", 2)
+    testEquation("1+2 = 12/(a+1)", "a", 3)
+    testEquation("1+2 = a-2", "a", 5)
+    testEquation("1+2 = a/2", "a", 6)
+    testEquation("(1+2)*3 = 6/((2/a)/3)", "a", 1)
   }
 }
