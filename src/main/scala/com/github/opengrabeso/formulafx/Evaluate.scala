@@ -5,7 +5,6 @@ import scala.util.Try
 import scala.util.parsing.combinator.JavaTokenParsers
 
 object Evaluate {
-
   import Format._
 
   implicit def doubleToNumber(x: Double): Number = Number(x, General)
@@ -16,6 +15,8 @@ object Evaluate {
   private var variableStore = Map[String, Number]()
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
+
+  def clear(): Unit = {variableStore = Map()}
 
   def angleUnitDegree(): Unit = angleUnit = AngleUnit.Degree
   def angleUnitRadian(): Unit = angleUnit = AngleUnit.Radian
@@ -28,13 +29,7 @@ object Evaluate {
   def angleToRadians(x: Double) = angleUnit.toRadians(x)
   def angleFromRadians(x: Double) = angleUnit.fromRadians(x)
 
-  object ExprParser extends JavaTokenParsers with Expression {
-
-    override val variables = new Variables {
-      override def apply(name: String) = variableStore(name)
-      override def isDefinedAt(name: String) = variableStore.isDefinedAt(name)
-    }
-    override val settings = new ExpressionSettings(angleUnit)
+  class ExprParser(override val variables: Variables, override val settings: ExpressionSettings) extends JavaTokenParsers with Expression {
 
     type Operator = (Double, Double) => Double
     type Function = Double => Number
@@ -107,7 +102,9 @@ object Evaluate {
         iSolved match {
           case VariableItem(varName) =>
             val res = xSolved.value
-            variableStore += (varName -> res)
+            if (!settings.preview) {
+              variableStore += (varName -> res)
+            }
             res
           case _ =>
             throw new UnsupportedOperationException("Unable to solve equation")
@@ -124,8 +121,22 @@ object Evaluate {
     }
   }
 
-  def apply(input: String): Try[String] = {
-    ExprParser(input).map(_.toString)
-  }
+  object ExprParser extends ExprParser(
+    new Variables {override def apply(name: String) = throw new UnsupportedOperationException("No variables supported here")
+      override def isDefinedAt(name: String) = false
+    },
+    new ExpressionSettings(AngleUnit.Radian, false)
+  )
 
+  def compute(input: String, preview: Boolean): Try[String] = {
+    val exprParser = new ExprParser(
+      new Variables {
+        override def apply(name: String) = variableStore(name)
+        override def isDefinedAt(name: String) = variableStore.isDefinedAt(name)
+      },
+      new ExpressionSettings(angleUnit, preview)
+    )
+
+    exprParser(input).map(_.toString)
+  }
 }

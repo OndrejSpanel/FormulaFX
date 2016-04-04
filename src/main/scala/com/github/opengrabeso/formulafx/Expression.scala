@@ -18,7 +18,7 @@ object AngleUnit {
   }
 }
 
-case class ExpressionSettings(angleUnit: AngleUnit)
+case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean)
 
 trait Variables extends PartialFunction[String, Number] {
   def apply(name: String): Number
@@ -63,8 +63,21 @@ trait Expression {
     def isConstant = x.isConstant
   }
 
+  private def solveLeftUnknown(left: Item, right: Item): (Item, Item) = {
+    (left, right)
+  }
   def solve(left: Item, right: Item): (Item, Item) = {
-    left -> right
+    (left.isConstant, right.isConstant) match {
+      case (false, true) =>
+        solveLeftUnknown(left, right)
+      case (true, false) =>
+        solveLeftUnknown(right, left)
+      case (false, false) =>
+        throw new UnsupportedOperationException("Equation with mutliple unknowns") // TODO: allow multiple occurences of one unknown
+      case (true, true) =>
+        // determine "most unknown" automatically
+        throw new UnsupportedOperationException("Equation with no unknown")
+    }
   }
 
 }

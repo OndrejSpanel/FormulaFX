@@ -54,7 +54,7 @@ object FormulaFX extends JFXApp {
           val row = prefs.get(rowId(i), "")
           tableData.add(TableRowText(row))
           // we need to execute even lines so that variables are initialized
-          if ((i%2) == 0) Evaluate(row)
+          if ((i%2) == 0) Evaluate.compute(row, false)
         }
       }
     }
@@ -62,8 +62,8 @@ object FormulaFX extends JFXApp {
     loadSession()
 
     scene = new Scene {
-      def computeResult(): Unit = {
-        val resultText = Evaluate(input.text.value)
+      def computeResult(preview: Boolean): Unit = {
+        val resultText = Evaluate.compute(input.text.value, preview)
         resultText.map { res =>
           result.text = res
         }
@@ -77,7 +77,7 @@ object FormulaFX extends JFXApp {
         Platform.runLater(requestFocus())
 
         onAction = handle {
-          val resultText = Evaluate(text.value)
+          val resultText = Evaluate.compute(text.value, false)
           resultText.map { res =>
             tableData.add(new TableRowText(text.value))
             tableData.add(new TableRowText("  " + res))
@@ -87,7 +87,7 @@ object FormulaFX extends JFXApp {
           }
         }
 
-        text.onChange { computeResult()}
+        text.onChange { computeResult(true)}
 
       }
       val statusBar = new Label
@@ -95,7 +95,7 @@ object FormulaFX extends JFXApp {
       def changeSettings(change: => Unit): Unit = {
         change
         showStatus()
-        computeResult()
+        computeResult(true)
 
       }
       private val menuRadian = new CheckMenuItem("Radian") {
@@ -114,7 +114,7 @@ object FormulaFX extends JFXApp {
             items = Seq(
               new MenuItem("Clear history") {
                 accelerator = new KeyCharacterCombination("N", KeyCombination.ControlDown)
-                onAction = handle {clearTable()}
+                onAction = handle {clearTable();Evaluate.clear()}
               }
             )
           },
