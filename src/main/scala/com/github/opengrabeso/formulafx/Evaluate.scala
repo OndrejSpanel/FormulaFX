@@ -29,7 +29,9 @@ object Evaluate {
   def angleToRadians(x: Double) = angleUnit.toRadians(x)
   def angleFromRadians(x: Double) = angleUnit.fromRadians(x)
 
-  class ExprParser(override val variables: Variables, override val settings: ExpressionSettings) extends JavaTokenParsers with Expression {
+  import Expression._
+
+  class ExprParser()(implicit val settings: ExpressionSettings) extends JavaTokenParsers with Expression {
 
     type Operator = (Double, Double) => Double
     type Function = Double => Number
@@ -121,20 +123,19 @@ object Evaluate {
     }
   }
 
-  object ExprParser extends ExprParser(
-    new Variables {override def apply(name: String) = throw new UnsupportedOperationException("No variables supported here")
+  object ExprParser extends ExprParser()(
+    new ExpressionSettings(AngleUnit.Radian, false,  new Variables {
+      override def apply(name: String) = throw new UnsupportedOperationException("No variables supported here")
       override def isDefinedAt(name: String) = false
-    },
-    new ExpressionSettings(AngleUnit.Radian, false)
+    })
   )
 
   def compute(input: String, preview: Boolean): Try[String] = {
-    val exprParser = new ExprParser(
-      new Variables {
+    val exprParser = new ExprParser()(
+      new ExpressionSettings(angleUnit, preview, new Variables {
         override def apply(name: String) = variableStore(name)
         override def isDefinedAt(name: String) = variableStore.isDefinedAt(name)
-      },
-      new ExpressionSettings(angleUnit, preview)
+      })
     )
 
     exprParser(input).map(_.toString)

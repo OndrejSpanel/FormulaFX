@@ -18,55 +18,69 @@ object AngleUnit {
   }
 }
 
-case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean)
-
-trait Variables extends PartialFunction[String, Number] {
-  def apply(name: String): Number
-  def isDefinedAt(name: String): Boolean
+object Expression {
+  type Variables = PartialFunction[String, Number]
 }
 
+import Expression._
+
+case class ExpressionSettings(angleUnit: AngleUnit, preview: Boolean, variables: Variables)
+
 trait Expression {
-  def variables: Variables
-  def settings: ExpressionSettings
+  expr =>
 
   sealed trait Item {
-    def isConstant: Boolean
-    def value: Number
+    def isConstant(implicit settings: ExpressionSettings): Boolean
+    def value(implicit settings: ExpressionSettings): Number
+    def leftmostVariable: Option[String]
   }
 
   case class VariableItem(name: String) extends Item {
-    def isConstant = variables.isDefinedAt(name)
-    def value = variables(name)
+    def isConstant(implicit settings: ExpressionSettings) = settings.variables.isDefinedAt(name)
+    def value(implicit settings: ExpressionSettings) = settings.variables(name)
+    def leftmostVariable = Some(name)
   }
 
   case class LiteralItem(number: Number) extends Item {
-    def value = number
-    def isConstant = true
+    def value(implicit settings: ExpressionSettings) = number
+    def isConstant(implicit settings: ExpressionSettings) = true
+    def leftmostVariable = None
   }
 
   case class OperatorItem(op: (Double, Double) => Double, left: Item, right: Item) extends Item {
-    def value = {
+    def value(implicit settings: ExpressionSettings) = {
       val valueL = left.value
       val valueR = right.value
       val retValue = op(valueL.x, valueR.x)
       val retFormat = valueL combineFormat valueR
       Number(retValue, retFormat)
     }
-    def isConstant = left.isConstant && right.isConstant
+    def isConstant(implicit settings: ExpressionSettings) = left.isConstant && right.isConstant
+    def leftmostVariable = left.leftmostVariable orElse right.leftmostVariable
   }
 
   case class FunctionItem(f: Double => Number, x: Item) extends Item {
-    def value = {
+    def value(implicit settings: ExpressionSettings) = {
       val par = x.value
       f(par.x) // TODO: some functions should respect input format
     }
-    def isConstant = x.isConstant
+    def isConstant(implicit settings: ExpressionSettings) = x.isConstant
+    def leftmostVariable = x.leftmostVariable
   }
 
   private def solveLeftUnknown(left: Item, right: Item): (Item, Item) = {
     (left, right)
   }
-  def solve(left: Item, right: Item): (Item, Item) = {
+
+  def solveWithUnknown(left: Item, right: Item, unknownName: String)(implicit settings: ExpressionSettings): (Item, Item) = {
+    val settingsWithUnknown = settings.copy(variables = new Variables {
+      override def isDefinedAt(name: String) = name != unknownName && settings.variables.isDefinedAt(name)
+      override def apply(name: String) = settings.variables.apply(name)
+    })
+    solve(left, right)(settingsWithUnknown)
+  }
+
+  def solve(left: Item, right: Item)(implicit settings: ExpressionSettings): (Item, Item) = {
     (left.isConstant, right.isConstant) match {
       case (false, true) =>
         solveLeftUnknown(left, right)
@@ -76,7 +90,15 @@ trait Expression {
         throw new UnsupportedOperationException("Equation with mutliple unknowns") // TODO: allow multiple occurences of one unknown
       case (true, true) =>
         // determine "most unknown" automatically
-        throw new UnsupportedOperationException("Equation with no unknown")
+        val leftUnknown = left.leftmostVariable
+        val rightUnknown = right.leftmostVariable
+        val unknown = leftUnknown orElse rightUnknown
+        unknown.map { unknownName =>
+          // make the variable unknown, try again
+          solveWithUnknown(left, right, unknownName)
+        }.getOrElse {
+          throw new UnsupportedOperationException("Equation with no unknown")
+        }
     }
   }
 
