@@ -4,10 +4,10 @@ Expression (line based) calculator
 Number format:
 ----
 
-floating point 123.456, 123.456e78
-hexadecimal 0x123456
-degree (hour):minutes  12:34.56
-degree (hour):minutes:seconds  12:34:56.78
+- floating point `123.456`, `123.456e78`
+- hexadecimal `0x123456`
+- degree (hour):minutes  `12:34.56`
+- degree (hour):minutes:seconds  `12:34:56.78`
 
 When hexadecimal or other special notation is used in the expression, the result is displayed using the same notation is possible.
 
