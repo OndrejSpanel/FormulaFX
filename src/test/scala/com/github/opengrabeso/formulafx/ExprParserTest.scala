@@ -6,9 +6,11 @@ import scala.util.{Failure, Success, Try}
 import Format._
 import org.scalactic.{Equivalence, ConversionCheckedTripleEquals}
 
-class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTripleEquals {
-
+trait ExpressionTestUtils {
   def res(x: Double) = Success(Number(x, General))
+}
+
+class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTripleEquals with ExpressionTestUtils {
 
   implicit val numberEq = new Equivalence[Try[Number]] {
     override def areEquivalent(a: Try[Number], b: Try[Number]) = (a, b) match {
@@ -20,14 +22,16 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     }
   }
 
-  "Expression parser" should "compute simple arithmetic expressions" in {
+  behavior of "Expression parser"
+
+  it should "compute simple arithmetic expressions" in {
     Evaluate.ExprParser("1") shouldBe res(1)
     Evaluate.ExprParser("1 + 2") shouldBe res(3)
     Evaluate.ExprParser("1 + 2 * 3") shouldBe res(7)
     Evaluate.ExprParser("(1 + 2) * 3") shouldBe res(9)
   }
 
-  "Expression parser" should "reject invalid expressions" in {
+  it should "reject invalid expressions" in {
     Evaluate.ExprParser("1+*2") shouldBe a[Failure[_]]
     Evaluate.ExprParser("1+)3") shouldBe a[Failure[_]]
     Evaluate.ExprParser("(1+)3") shouldBe a[Failure[_]]
@@ -60,8 +64,9 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("cos(0)") shouldBe res(1)
   }
 
-  it should "evaluate assignments" in {
-    Evaluate.ExprParser("a = 123") shouldBe res(123.0)
+  it should "compute expressions with power" in {
+    Evaluate.ExprParser("2 ^ 4") shouldBe res(16)
+    Evaluate.ExprParser("2 ^ (1/2)") shouldBe res(Math.sqrt(2))
   }
 
   it should "fail on malformed expressions" in {
