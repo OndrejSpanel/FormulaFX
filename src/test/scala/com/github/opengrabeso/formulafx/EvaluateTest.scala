@@ -69,6 +69,16 @@ class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
     testEquation("cos(a) = 1", "a", 0)
   }
 
+  it should "invert power" in {
+    testEquation("a^2 = 4", "a", 2)
+    testEquation("a^3 = 27", "a", 3)
+    testEquation("3^a = 27", "a", 3)
+    testEquation("a^4 = 16", "a", 2)
+    testEquation("2^a = 8", "a", 3)
+    testEquation("2^a = 16", "a", 4)
+    testEquation("2^a = 32", "a", 5)
+  }
+
   it should "not invert non-inversible functions" in {
     computeEquation("round(x) = 0") shouldBe a[Failure[_]]
     computeEquation("ceil(x) = 0") shouldBe a[Failure[_]]

@@ -46,9 +46,14 @@ object Expression {
     override def inverseRight(ret: Double, v2: Double) = ret / v2
   }
   object operator_/ extends Operator {
-    override def apply(v1: Double, v2: Double) = v1 / v2
+    override def apply(v1: Double, v2: Double) = v1 / v2    // ret = v1 / v2
     override def inverseLeft(ret: Double, v1: Double) = v1 / ret
-    override def inverseRight(ret: Double, v1: Double) = ret * v1
+    override def inverseRight(ret: Double, v2: Double) = ret * v2
+  }
+  object operator_^ extends Operator {
+    override def apply(v1: Double, v2: Double) = Math.pow(v1, v2) // ret = exp(log(v1) * v2), log(ret) = log(v1) * v2
+    override def inverseLeft(ret: Double, v1: Double) = Math.log(ret) / Math.log(v1)
+    override def inverseRight(ret: Double, v2: Double) = Math.pow(ret, 1/v2) // log(v1) = log(ret)/v2
   }
 
   trait Function extends (Double => Number) {

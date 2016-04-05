@@ -64,6 +64,11 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
     Evaluate.ExprParser("cos(0)") shouldBe res(1)
   }
 
+  it should "compute expressions with power" in {
+    Evaluate.ExprParser("2 ^ 4") shouldBe res(16)
+    Evaluate.ExprParser("2 ^ (1/2)") shouldBe res(Math.sqrt(2))
+  }
+
   it should "fail on malformed expressions" in {
     Evaluate.ExprParser("1 + / 2") shouldBe a[Failure[_]]
     Evaluate.ExprParser("1 +") shouldBe a[Failure[_]]

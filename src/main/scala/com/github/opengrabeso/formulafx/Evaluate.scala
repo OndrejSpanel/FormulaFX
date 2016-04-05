@@ -87,6 +87,8 @@ object Evaluate {
     def number: Parser[LiteralItem] = minutesAndSeconds | minutes | hexNum | fNumber
     def factor: Parser[Item] = (number | function | variable) | "(" ~> expr <~ ")"
 
+    def powOperators =
+      operator("^" , Expression.operator_^)
 
     def mulOperators =
       operator("*" , Expression.operator_*) |
@@ -100,7 +102,9 @@ object Evaluate {
       case number ~ list => list.foldLeft(number) { case (x, op ~ y) => new OperatorItem(op, x, y) }
     }
 
-    def term: Parser[Item] = factor ~ rep(mulOperators ~ factor) ^^ processOperators
+    def powTerm: Parser[Item] = factor ~ rep(powOperators ~ factor) ^^ processOperators
+
+    def term: Parser[Item] = powTerm ~ rep(mulOperators ~ powTerm) ^^ processOperators
 
     def expr: Parser[Item] = term ~ rep(addOperators ~ term) ^^ processOperators
 
