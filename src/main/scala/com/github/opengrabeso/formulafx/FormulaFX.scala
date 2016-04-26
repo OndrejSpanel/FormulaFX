@@ -15,6 +15,8 @@ import scalafx.scene.input._
 import scalafx.scene.layout.{BorderPane, VBox}
 import com.github.opengrabeso.scalafx.TextFieldAcceleratorFix
 
+import scalafx.scene.image.Image
+
 case class TableRowText(t: String) {
   val text = new StringProperty(this, "text", t)
 }
@@ -22,8 +24,13 @@ case class TableRowText(t: String) {
 //noinspection ForwardReference
 object FormulaFX extends JFXApp {
   def prefs: Preferences = Preferences.userRoot().node(getClass.getPackage.getName.toLowerCase)
+
   stage = new JFXApp.PrimaryStage {
     title.value = "Formula Fx - Expression Calculator"
+
+
+    private val icon = new Image("/calculator.png")
+    icons.add(icon)
 
     val tableData = ObservableBuffer[TableRowText]()
 
