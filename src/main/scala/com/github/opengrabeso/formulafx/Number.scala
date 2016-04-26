@@ -2,6 +2,8 @@ package com.github.opengrabeso.formulafx
 
 sealed trait Format {
   def score: Int
+
+  def combine(that: Format) = if (that.score >= score) that else this
 }
 
 object Format {
@@ -152,7 +154,7 @@ object Number {
 case class Number(x: Double, f: Format) {
   import Number._
 
-  def combineFormat(b: Number): Format = if (f.score >= b.f.score) f else b.f
+  def combineFormat(b: Number): Format = f combine b.f
 
   override def toString = f match {
     case Minutes => toMinutes(x)

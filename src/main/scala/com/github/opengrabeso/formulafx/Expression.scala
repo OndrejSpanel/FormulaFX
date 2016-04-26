@@ -28,6 +28,7 @@ object Expression {
   trait Operator extends ((Double, Double) => Double) {
     def inverseLeft(ret: Double, v1: Double): Double
     def inverseRight(ret: Double, v2: Double): Double
+    def combineFormat(l: Format, r: Format) = l combine r
   }
 
   object operator_+ extends Operator {
@@ -49,6 +50,10 @@ object Expression {
     override def apply(v1: Double, v2: Double) = v1 / v2    // ret = v1 / v2
     override def inverseLeft(ret: Double, v1: Double) = v1 / ret
     override def inverseRight(ret: Double, v2: Double) = ret * v2
+    override def combineFormat(l: Format, r: Format) = {
+      if (l == r) Format.General
+      else super.combineFormat(l, r)
+    }
   }
   object operator_^ extends Operator {
     override def apply(v1: Double, v2: Double) = Math.pow(v1, v2) // ret = exp(log(v1) * v2), log(ret) = log(v1) * v2
@@ -161,7 +166,7 @@ trait Expression {
       val valueL = left.value
       val valueR = right.value
       val retValue = op(valueL.x, valueR.x)
-      val retFormat = valueL combineFormat valueR
+      val retFormat = op.combineFormat(valueL.f, valueR.f)
       Number(retValue, retFormat)
     }
     def isConstant(implicit settings: ExpressionSettings) = left.isConstant && right.isConstant
