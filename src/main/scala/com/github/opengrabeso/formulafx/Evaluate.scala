@@ -81,10 +81,11 @@ object Evaluate {
     }
 
     def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
+    def percent: Parser[LiteralItem] = floatingPointNumber <~ "%" ^^ { x => Number(x.toDouble * 0.01, General)} // consider percent format?
 
     def variable: Parser[VariableItem] = ident ^^ { x => new VariableItem(x) }
     def fNumber: Parser[LiteralItem] = floatingPointNumber ^^ { x => x.toDouble }
-    def number: Parser[LiteralItem] = minutesAndSeconds | minutes | hexNum | fNumber
+    def number: Parser[LiteralItem] = minutesAndSeconds | minutes | hexNum | percent | fNumber
     def factor: Parser[Item] = (number | function | variable) | "(" ~> expr <~ ")"
 
     def powOperators =
