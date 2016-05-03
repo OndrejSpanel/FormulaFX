@@ -10,7 +10,7 @@ Number format:
 - degree (hour):minutes:seconds  `12:34:56.78`
 - percent `123.45%`
 
-When hexadecimal or other special notation is used in the expression, the result is displayed using the same notation is possible.
+When hexadecimal or other special notation is used in the expression, the result is displayed using the same notation if possible.
 
 Supported operators:
 ----
