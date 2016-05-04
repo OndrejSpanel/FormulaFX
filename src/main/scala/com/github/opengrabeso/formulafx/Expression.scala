@@ -217,7 +217,7 @@ trait Expression {
       case (true, false) =>
         solveLeftUnknown(right, left.value)
       case (false, false) =>
-        throw new UnsupportedOperationException("Equation with mutliple unknowns") // TODO: allow multiple occurences of one unknown
+        throw new UnsupportedOperationException("Equation with multiple unknowns") // TODO: allow multiple occurences of one unknown
       case (true, true) =>
         // determine "most unknown" automatically
         val leftUnknown = left.leftmostVariable
