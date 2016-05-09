@@ -2,6 +2,13 @@ import org.scalajs.sbtplugin.cross.CrossType
 
 scalaVersion in ThisBuild := "2.11.8"
 
+// settings here used by IDE for highlighting
+libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.60-R9"
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
   settings(
