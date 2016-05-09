@@ -1,9 +1,8 @@
 package com.github.opengrabeso.formulafx
 
-import scala.scalajs.js.JSApp
-import org.scalajs.dom
-import dom.document
+import org.scalajs.dom._
 
+import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
 /**
