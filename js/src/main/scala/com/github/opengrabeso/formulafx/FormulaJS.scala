@@ -2,6 +2,7 @@ package com.github.opengrabeso.formulafx
 
 import org.scalajs.dom._
 
+import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
 
@@ -15,12 +16,15 @@ object FormulaJS extends JSApp {
 
   @JSExport
   def eval(str: String): Unit = {
+    val document = js.Dynamic.global.document // evalNode.value not working without Dynamic
     val resultNode = document.getElementById("result")
-    val resText = Evaluate.compute(str, false)
+    val evalNode = document.getElementById("eval")
+
+    val resText = Evaluate.compute(str, true)
 
     resText.map { res =>
       resultNode.innerHTML = res
-      // TODO: clear input field
+      evalNode.value = ""
     }
 
   }
