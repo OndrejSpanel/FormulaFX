@@ -16,7 +16,13 @@ object FormulaJS extends JSApp {
 
   @JSExport
   def eval(str: String): Unit = {
-    val result = document.getElementById("result")
-    result.innerHTML = s"Result of $str"
+    val resultNode = document.getElementById("result")
+    val resText = Evaluate.compute(str, false)
+
+    resText.map { res =>
+      resultNode.innerHTML = res
+      // TODO: clear input field
+    }
+
   }
 }
