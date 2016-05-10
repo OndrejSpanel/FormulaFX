@@ -11,6 +11,9 @@ import scala.scalajs.js.annotation.JSExport
   * Created by Ondra on 9.5.2016.
   */
 object FormulaJS extends JSApp {
+
+  private val resPrefix = "&nbsp;&nbsp;"
+
   def main(): Unit = {
     println("Formula JS")
   }
@@ -28,11 +31,28 @@ object FormulaJS extends JSApp {
     tableNode.appendChild(tr)
   }
 
+  def setInput(str: String): Unit = {
+    val document = js.Dynamic.global.document // evalNode.value not working without Dynamic
+    val evalNode = document.getElementById("eval") //.asInstanceOf[html.Paragraph]
+    if (str.startsWith(resPrefix)) {
+      evalNode.value = str.drop(resPrefix.length)
+    } else {
+      evalNode.value = str
+    }
+  }
+
+  @JSExport
+  def tableClicked(element: Element): Unit = {
+    if (element.nodeName=="TD") {
+      val resultNode = document.getElementById("result")
+      setInput(element.innerHTML)
+      eval(element.innerHTML, true)
+    }
+  }
+
   @JSExport
   def eval(str: String, preview: Boolean): Unit = {
-    val document = js.Dynamic.global.document // evalNode.value not working without Dynamic
     val resultNode = document.getElementById("result")
-    val evalNode = document.getElementById("eval") //.asInstanceOf[html.Paragraph]
 
     val resText = Evaluate.compute(str, preview)
 
@@ -40,8 +60,8 @@ object FormulaJS extends JSApp {
       resultNode.innerHTML = res
       if (!preview) {
         addTableRow(str, "expr")
-        addTableRow("&nbsp;&nbsp;" + res, "result")
-        evalNode.value = ""
+        addTableRow(resPrefix + res, "result")
+        setInput("")
       }
     }
 
