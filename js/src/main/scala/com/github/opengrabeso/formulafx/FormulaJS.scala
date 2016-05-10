@@ -20,7 +20,7 @@ object FormulaJS extends JSApp {
     val resultNode = document.getElementById("result")
     val evalNode = document.getElementById("eval")
 
-    val resText = Evaluate.compute(str, true)
+    val resText = Evaluate.compute(str, false)
 
     resText.map { res =>
       resultNode.innerHTML = res
