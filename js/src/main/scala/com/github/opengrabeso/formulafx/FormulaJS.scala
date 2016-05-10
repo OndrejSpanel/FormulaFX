@@ -15,16 +15,16 @@ object FormulaJS extends JSApp {
   }
 
   @JSExport
-  def eval(str: String): Unit = {
+  def eval(str: String, preview: Boolean): Unit = {
     val document = js.Dynamic.global.document // evalNode.value not working without Dynamic
     val resultNode = document.getElementById("result")
     val evalNode = document.getElementById("eval")
 
-    val resText = Evaluate.compute(str, false)
+    val resText = Evaluate.compute(str, preview)
 
     resText.map { res =>
       resultNode.innerHTML = res
-      evalNode.value = ""
+      if (!preview) evalNode.value = ""
     }
 
   }
