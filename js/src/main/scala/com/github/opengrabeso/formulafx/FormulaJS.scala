@@ -17,11 +17,12 @@ object FormulaJS extends JSApp {
 
   val tableData = mutable.ArrayBuffer[String]()
 
-  def addTableRow(str: String): Unit = {
+  def addTableRow(str: String, c: String): Unit = {
     tableData += str
     val tableNode = document.getElementById("history")
     val tr = document.createElement("tr")
     val td = document.createElement("td")
+    td.setAttribute("class", c)
     tr.appendChild(td)
     td.innerHTML = str
     tableNode.appendChild(tr)
@@ -38,8 +39,8 @@ object FormulaJS extends JSApp {
     resText.map { res =>
       resultNode.innerHTML = res
       if (!preview) {
-        addTableRow(str)
-        addTableRow("&nbsp;&nbsp;" + res)
+        addTableRow(str, "expr")
+        addTableRow("&nbsp;&nbsp;" + res, "result")
         evalNode.value = ""
       }
     }
