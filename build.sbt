@@ -40,8 +40,8 @@ lazy val projs = crossProject.crossType(
   ).
   jsSettings(
     libraryDependencies += "org.scala-js" %%% "scala-parser-combinators" % "1.0.2",
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
-    // Add JS-specific settings here
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"
   )
 
 lazy val pJVM = projs.jvm
