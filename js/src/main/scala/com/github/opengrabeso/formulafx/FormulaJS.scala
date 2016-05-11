@@ -1,4 +1,5 @@
-package com.github.opengrabeso.formulafx
+package com.github.opengrabeso
+package formulafx
 
 import org.scalajs.dom._
 
@@ -6,10 +7,8 @@ import scala.collection.mutable
 import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
+import com.github.opengrabeso.js.JsUtils._
 
-/**
-  * Created by Ondra on 9.5.2016.
-  */
 object FormulaJS extends JSApp {
 
   private val resPrefix = "&nbsp;&nbsp;"
@@ -41,6 +40,30 @@ object FormulaJS extends JSApp {
     }
   }
 
+  def setResult(res: String): Unit = {
+    val resultNode = document.getElementById("result")
+    resultNode.innerHTML = res
+  }
+
+
+  @JSExport
+  def reset(): Unit = {
+    tableData.clear()
+    Evaluate.clear()
+
+    // remove all rows except the first (headers)
+    val tableNode = document.getElementById("history")
+    val chs = tableNode.childNodes.copySeq // copy needed to avoid mutation while iterating
+    for (n <- chs) {
+      val ch = n.firstChild
+      // delete all but headers
+      if (ch!=null && ch.nodeName=="TD") {
+        tableNode.removeChild(n)
+      }
+    }
+    setInput("")
+    setResult("")
+  }
   @JSExport
   def tableClicked(element: Element): Unit = {
     if (element.nodeName=="TD") {
@@ -52,12 +75,11 @@ object FormulaJS extends JSApp {
 
   @JSExport
   def eval(str: String, preview: Boolean): Unit = {
-    val resultNode = document.getElementById("result")
 
     val resText = Evaluate.compute(str, preview)
 
     resText.map { res =>
-      resultNode.innerHTML = res
+      setResult(res)
       if (!preview) {
         addTableRow(str, "expr")
         addTableRow(resPrefix + res, "result")
@@ -66,4 +88,5 @@ object FormulaJS extends JSApp {
     }
 
   }
+
 }
