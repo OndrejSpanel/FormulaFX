@@ -9,6 +9,19 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
+def generateIndexTask(index: String, suffix: String) = Def.task {
+  val source = baseDirectory.value / "index.html"
+  val target = (crossTarget in Compile).value / index
+  val log = streams.value.log
+  IO.writeLines(target,
+    IO.readLines(source).map {
+      line => line.replace("{{target-js}}", s"formulafx-$suffix.js")
+    }
+  )
+
+  log.info(s"Generate $index with suffix: $suffix")
+}
+
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
   settings(
@@ -16,13 +29,15 @@ lazy val root = project.in(file(".")).
     publishLocal := {}
   )
 
-lazy val projs = crossProject.crossType(
-  new CrossType {
-    // similar to CrossType.Full, but with a different sharedSrcDir
-    def projectDir(crossBase: File, projectType: String): File = crossBase / projectType
+lazy val myCrossType = new CrossType {
+  // similar to CrossType.Full, but with a different sharedSrcDir
+  def projectDir(crossBase: File, projectType: String): File = crossBase / projectType
 
-    def sharedSrcDir(projectBase: File, conf: String): Option[File] = Some(projectBase.getParentFile / "src" / conf / "scala")
-  }
+  def sharedSrcDir(projectBase: File, conf: String): Option[File] = Some(projectBase.getParentFile / "src" / conf / "scala")
+}
+
+lazy val projs = crossProject.crossType(
+  myCrossType
 ).
   in(file(".")).
   settings(
@@ -41,7 +56,10 @@ lazy val projs = crossProject.crossType(
   jsSettings(
     libraryDependencies += "org.scala-js" %%% "scala-parser-combinators" % "1.0.2",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test"
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test",
+    (fastOptJS in Compile) <<= (fastOptJS in Compile).dependsOn(generateIndexTask("index-fast.html","fastOpt")),
+    (fullOptJS in Compile) <<= (fullOptJS in Compile).dependsOn(generateIndexTask("index.html","opt"))
+
   )
 
 lazy val pJVM = projs.jvm
