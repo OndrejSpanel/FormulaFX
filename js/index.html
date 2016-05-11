@@ -17,7 +17,9 @@
 
 <body>
 <script type="text/javascript" src="{{target-js}}"></script>
-<table id="history" onclick="com.github.opengrabeso.formulafx.FormulaJS().tableClicked(event.target)"></table>
+<table id="history" onclick="com.github.opengrabeso.formulafx.FormulaJS().tableClicked(event.target)">
+  <tr><th>Expression / Result</th></tr>
+</table>
 
 <input id="eval" type="text" class="textInput"
        onchange="com.github.opengrabeso.formulafx.FormulaJS().eval(this.value, false)"
