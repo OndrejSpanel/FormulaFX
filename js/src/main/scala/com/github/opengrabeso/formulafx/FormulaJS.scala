@@ -85,10 +85,8 @@ object FormulaJS extends JSApp {
     val version = prefs.get("version", "")
     if (version.nonEmpty) {
       val rows = prefs.getInt("rows", 0)
-      tableData.clear()
       for (i <- 0 until rows) {
         val row = prefs.get(rowId(i), "")
-        tableData += row
         // we need to execute even lines so that variables are initialized
         if ((i % 2) == 0) {
           Evaluate.compute(row, false)
@@ -103,7 +101,6 @@ object FormulaJS extends JSApp {
 
   @JSExport
   def reset(): Unit = {
-    tableData.clear()
     Evaluate.clear()
 
     clearTable()
@@ -112,6 +109,7 @@ object FormulaJS extends JSApp {
   }
 
   def clearTable(): Unit = {
+    tableData.clear()
     // remove all rows except the first (headers)
     val tableNode = document.getElementById("history")
     val chs = tableNode.childNodes.copySeq // copy needed to avoid mutation while iterating
