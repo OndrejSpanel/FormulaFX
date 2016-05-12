@@ -10,7 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 import com.github.opengrabeso.js.JsUtils._
 import org.scalajs.dom
 
-@JSExport(name="formula.JS")
+@JSExport(name="FormulaJS")
 object FormulaJS extends JSApp {
 
   private val resPrefix = "&nbsp;&nbsp;"
@@ -30,10 +30,21 @@ object FormulaJS extends JSApp {
     tableData += str
     val tableNode = document.getElementById("history")
     val tr = document.createElement("tr")
+    val tdr = document.createElement("td")
+    tr.appendChild(tdr)
+    tdr.setAttribute("class", c)
+
     val td = document.createElement("td")
-    td.setAttribute("class", c)
-    tr.appendChild(td)
     td.innerHTML = str
+    tdr.appendChild(td)
+
+    /*
+    val tdPin = document.createElement("td")
+    tdPin.setAttribute("class","pin")
+    tdPin.innerHTML = ">"
+    tdr.appendChild(tdPin)
+    */
+
     tableNode.appendChild(tr)
   }
 
@@ -70,6 +81,7 @@ object FormulaJS extends JSApp {
 
   @JSExport
   def loadSession(): Unit = {
+    clearTable()
     val version = prefs.get("version", "")
     if (version.nonEmpty) {
       val rows = prefs.getInt("rows", 0)
@@ -94,6 +106,12 @@ object FormulaJS extends JSApp {
     tableData.clear()
     Evaluate.clear()
 
+    clearTable()
+    setInput("")
+    setResult("")
+  }
+
+  def clearTable(): Unit = {
     // remove all rows except the first (headers)
     val tableNode = document.getElementById("history")
     val chs = tableNode.childNodes.copySeq // copy needed to avoid mutation while iterating
@@ -104,16 +122,21 @@ object FormulaJS extends JSApp {
         tableNode.removeChild(n)
       }
     }
-    setInput("")
-    setResult("")
   }
 
   @JSExport
   def tableClicked(element: Element): Unit = {
     if (element.nodeName == "TD") {
+      def leafCell(e: Element): Element = {
+        val ch = e.firstElementChild
+        if (ch != null) leafCell(ch)
+        else e
+      }
+      val cell = leafCell(element)
+      val cellText = cell.innerHTML
       val resultNode = document.getElementById("result")
-      setInput(element.innerHTML)
-      eval(element.innerHTML, true)
+      setInput(cellText)
+      eval(cellText, true)
     }
   }
 

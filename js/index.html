@@ -7,11 +7,8 @@
     table {
       border: 2px solid black;
     }
-    .expr {
-    }
-    .result {
-      background-color: lightgray;
-    }
+    tr:nth-child(even) {background-color: #f2f2f2}
+    tr:hover {background-color: #e0e0ff}
   </style>
 </head>
 
@@ -19,25 +16,25 @@
 <script type="text/javascript" src="{{target-js}}"></script>
 
 <p>
-  <button onclick="formula.JS().reset()">Clear</button>
+  <button onclick="FormulaJS().reset()">Clear</button>
 </p>
 
-<table id="history" onclick="formula.JS().tableClicked(event.target)">
+<table id="history" onclick="FormulaJS().tableClicked(event.target)">
   <tr>
     <th>Expression / Result</th>
-    <th>Pinned</th>
+    <!--<th>Pinned</th>-->
   </tr>
 </table>
 
 
 <input id="eval" type="text" class="textInput"
-       onchange="formula.JS().eval(this.value, false)"
-       oninput="formula.JS().eval(this.value, true)"
+       onchange="FormulaJS().eval(this.value, false)"
+       oninput="FormulaJS().eval(this.value, true)"
 >
 
 <p id="result"></p>
 
-<script type="text/javascript">formula.JS().loadSession()</script>
+<script type="text/javascript">FormulaJS().loadSession()</script>
 
 </body>
 </html>
