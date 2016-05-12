@@ -10,6 +10,7 @@ import scala.scalajs.js.annotation.JSExport
 import com.github.opengrabeso.js.JsUtils._
 import org.scalajs.dom
 
+@JSExport(name="formula.JS")
 object FormulaJS extends JSApp {
 
   private val resPrefix = "&nbsp;&nbsp;"
