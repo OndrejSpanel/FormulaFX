@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Formula JS</title>
+  <style>
+    table {
+      border: 2px solid black;
+    }
+    tr:nth-child(even) {background-color: #f2f2f2}
+    tr:hover {background-color: #e0e0ff}
+  </style>
+</head>
+
+<body>
+<script type="text/javascript" src="{{target-js}}"></script>
+
+<p>
+  <button onclick="FormulaJS().reset()">Clear</button>
+</p>
+
+<table id="history" onclick="FormulaJS().tableClicked(event.target)">
+  <tr>
+    <th>Expression / Result</th>
+    <!--<th>Pinned</th>-->
+  </tr>
+</table>
+
+
+<input id="eval" type="text" class="textInput"
+       onchange="FormulaJS().eval(this.value, false)"
+       oninput="FormulaJS().eval(this.value, true)"
+>
+
+<p id="result"></p>
+
+<script type="text/javascript">FormulaJS().loadSession()</script>
+
+</body>
+</html>
