@@ -42,7 +42,7 @@ lazy val projs = crossProject.crossType(
   in(file(".")).
   settings(
     name := "FormulaFX",
-    version := "0.0.6-alpha",
+    version := "0.0.7-alpha",
     maxErrors := 1
   ).
   jvmSettings(
