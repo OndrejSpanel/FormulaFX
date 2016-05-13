@@ -20,7 +20,7 @@ object Format {
     def score = 20
   }
 
-  object Seconds extends Format {
+  object Hours extends Format {
     def score = 30
   }
 
@@ -158,7 +158,7 @@ case class Number(x: Double, f: Format) {
 
   override def toString = f match {
     case Minutes => toMinutes(x)
-    case Seconds => toSeconds(x)
+    case Hours => toSeconds(x)
     case Hex => toHex(x)
     case _ => x.toString
   }

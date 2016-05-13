@@ -75,9 +75,9 @@ object Evaluate {
     implicit def numberToItem(x: Number): LiteralItem = new LiteralItem(x)
     implicit def doubleToItem(x: Double): LiteralItem = new LiteralItem(Number(x, General))
 
-    def minutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
-    def minutesAndSeconds: Parser[LiteralItem] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
-      case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) + sec.toDouble * (1.0 / 3600) format Seconds
+    def hoursMinutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
+    def hoursMinutesSeconds: Parser[LiteralItem] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
+      case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) + sec.toDouble * (1.0 / 3600) format Hours
     }
 
     def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
@@ -87,7 +87,7 @@ object Evaluate {
 
     def variable: Parser[VariableItem] = ident ^^ { x => new VariableItem(x) }
     def fNumber: Parser[LiteralItem] = floatingPointNumber ^^ { x => x.toDouble }
-    def number: Parser[LiteralItem] = minutesAndSeconds | minutes | hexNum | percent | fNumber
+    def number: Parser[LiteralItem] = hoursMinutesSeconds | hoursMinutes | hexNum | percent | fNumber
     def factor: Parser[Item] = (number | function | variable) | "(" ~> expr <~ ")"
 
     def powOperators =

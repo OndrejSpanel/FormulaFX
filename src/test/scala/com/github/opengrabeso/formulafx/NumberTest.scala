@@ -30,7 +30,7 @@ class NumberTest extends FlatSpec with Matchers {
 
   it should "handle huge time gracefully" in {
     Number(1e10, Minutes).toString shouldBe 1e10.toString
-    Number(1e10, Seconds).toString shouldBe 1e10.toString
+    Number(1e10, Hours).toString shouldBe 1e10.toString
   }
 
   it should "format fractional minutes" in {
@@ -43,16 +43,16 @@ class NumberTest extends FlatSpec with Matchers {
   }
 
   it should "format fractional seconds rounded with overflow" in {
-    Number(1.999999999, Seconds).toString shouldBe "2:00:00"
-    Number(timeDMS(1, 12, 59.999999), Seconds).toString shouldBe "1:13:00"
-    Number(timeDMS(1, 12, 0.999999), Seconds).toString shouldBe "1:12:01"
+    Number(1.999999999, Hours).toString shouldBe "2:00:00"
+    Number(timeDMS(1, 12, 59.999999), Hours).toString shouldBe "1:13:00"
+    Number(timeDMS(1, 12, 0.999999), Hours).toString shouldBe "1:12:01"
   }
 
   it should "format seconds" in {
-    Number(1 + 1.0/3600, Seconds).toString shouldBe "1:00:01"
+    Number(1 + 1.0/3600, Hours).toString shouldBe "1:00:01"
   }
 
   it should "format fractional seconds" in {
-    Number(1 + 1.11/3600, Seconds).toString shouldBe "1:00:01.11"
+    Number(1 + 1.11/3600, Hours).toString shouldBe "1:00:01.11"
   }
 }
