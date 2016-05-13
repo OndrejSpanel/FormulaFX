@@ -44,7 +44,7 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
   }
 
   it should "parse minutes" in {
-    Evaluate.ExprParser("1:30") should === (res(1.5))
+    Evaluate.ExprParser("1:30") should === (res(90))
   }
 
   it should "output minutes as minutes" in {
@@ -56,7 +56,7 @@ class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTriple
   }
 
   it should "parse minutes and seconds" in {
-    Evaluate.ExprParser("1:30:30") should === (res(1.5 + 30.0/3600))
+    Evaluate.ExprParser("1:30:30") should === (res(3600 + 30*60 + 30))
   }
 
   it should "compute expressions with functions" in {

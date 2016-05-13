@@ -95,10 +95,11 @@ object Number {
   val intPart = NumberPartParams(Int.MaxValue, 1, x => f"${x.toInt}")
   val minSecPart = NumberPartParams(60, 1, x => f":${x.toInt}%02d")
 
-  def toMinutesPos(x: Double) = {
-    assert(x >= 0)
-    if (x>Int.MaxValue) x.toString
+  def toMinutesPos(xSec: Double) = {
+    assert(xSec >= 0)
+    if (xSec>Int.MaxValue) xSec.toString
     else {
+      val x = xSec / 60
       val degrees = x.toInt
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
 
@@ -112,9 +113,10 @@ object Number {
     }
   }
 
-  def toSecondsPos(x: Double) = {
-    if (x>Int.MaxValue) x.toString
+  def toSecondsPos(xSec: Double) = {
+    if (xSec>Int.MaxValue) xSec.toString
     else {
+      val x = xSec / 3600
       val degrees = x.toInt
       val (minutesWhole, minutesFrac) = extract60th(x - degrees)
       val (secondsWhole, secondsFrac) = extract60th(minutesFrac)
@@ -157,8 +159,8 @@ case class Number(x: Double, f: Format) {
   def combineFormat(b: Number): Format = f combine b.f
 
   override def toString = f match {
-    case Minutes => toMinutes(x / 60)
-    case Hours => toHours(x / 3600)
+    case Minutes => toMinutes(x)
+    case Hours => toHours(x)
     case Hex => toHex(x)
     case _ => x.toString
   }
