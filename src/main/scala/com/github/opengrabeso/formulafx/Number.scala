@@ -135,7 +135,7 @@ object Number {
     else toMinutesPos(+x)
   }
 
-  def toSeconds(x: Double) = {
+  def toHours(x: Double) = {
     if (x < 0) "-" + toSecondsPos(-x)
     else toSecondsPos(+x)
   }
@@ -157,8 +157,8 @@ case class Number(x: Double, f: Format) {
   def combineFormat(b: Number): Format = f combine b.f
 
   override def toString = f match {
-    case Minutes => toMinutes(x)
-    case Hours => toSeconds(x)
+    case Minutes => toMinutes(x / 60)
+    case Hours => toHours(x / 3600)
     case Hex => toHex(x)
     case _ => x.toString
   }

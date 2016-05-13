@@ -75,9 +75,9 @@ object Evaluate {
     implicit def numberToItem(x: Number): LiteralItem = new LiteralItem(x)
     implicit def doubleToItem(x: Double): LiteralItem = new LiteralItem(Number(x, General))
 
-    def hoursMinutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case deg ~ min => deg.toInt + min.toDouble * (1.0 / 60) format Minutes }
+    def hoursMinutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case mins ~ sec => mins.toInt * 60 + sec.toDouble format Minutes }
     def hoursMinutesSeconds: Parser[LiteralItem] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
-      case (deg ~ min ~ sec) => deg.toInt + min.toInt * (1.0 / 60) + sec.toDouble * (1.0 / 3600) format Hours
+      case (hours ~ mins ~ sec) => hours.toDouble * 3600 + mins.toDouble * 60 + sec.toDouble format Hours
     }
 
     def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
