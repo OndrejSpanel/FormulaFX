@@ -88,8 +88,8 @@ object FormulaFX extends JFXApp {
         onAction = handle {
           val resultText = Evaluate.compute(text.value, false)
           resultText.map { res =>
-            tableData.add(new TableRowText(text.value))
-            tableData.add(new TableRowText("  " + res))
+            tableData.add(TableRowText(text.value))
+            tableData.add(TableRowText("  " + res))
             text = ""
             result.text = ""
             saveSession()

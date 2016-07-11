@@ -70,10 +70,10 @@ object Evaluate {
         functionParAngle("tanh", Expression.function_tanh) |
         function("hex", Expression.function_hex)
 
-    def function: Parser[FunctionItem] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => new FunctionItem(f, x) }
+    def function: Parser[FunctionItem] = parseFunctionName ~ ("(" ~> expr <~ ")") ^^ { case f ~ x => FunctionItem(f, x) }
 
-    implicit def numberToItem(x: Number): LiteralItem = new LiteralItem(x)
-    implicit def doubleToItem(x: Double): LiteralItem = new LiteralItem(Number(x, General))
+    implicit def numberToItem(x: Number): LiteralItem = LiteralItem(x)
+    implicit def doubleToItem(x: Double): LiteralItem = LiteralItem(Number(x, General))
 
     def hoursMinutes: Parser[LiteralItem] = (wholeNumber <~ ":") ~ floatingPointNumber ^^ { case mins ~ sec => mins.toInt * 60 + sec.toDouble format Minutes }
     def hoursMinutesSeconds: Parser[LiteralItem] = (wholeNumber <~ ":") ~ (wholeNumber <~ ":") ~ floatingPointNumber ^^ {
@@ -85,7 +85,7 @@ object Evaluate {
 
     override def ident = """[a-zA-Z_]+\w*""".r
 
-    def variable: Parser[VariableItem] = ident ^^ { x => new VariableItem(x) }
+    def variable: Parser[VariableItem] = ident ^^ { x => VariableItem(x) }
     def fNumber: Parser[LiteralItem] = floatingPointNumber ^^ { x => x.toDouble }
     def number: Parser[LiteralItem] = hoursMinutesSeconds | hoursMinutes | hexNum | percent | fNumber
     def factor: Parser[Item] = (number | function | variable) | "(" ~> expr <~ ")"
@@ -102,7 +102,7 @@ object Evaluate {
       operator("-", Expression.operator_-)
 
     def processOperators: Item ~ List[Operator ~  Item] => Item = {
-      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => new OperatorItem(op, x, y) }
+      case number ~ list => list.foldLeft(number) { case (x, op ~ y) => OperatorItem(op, x, y) }
     }
 
     def powTerm: Parser[Item] = factor ~ rep(powOperators ~ factor) ^^ processOperators
@@ -136,12 +136,12 @@ object Evaluate {
   }
 
   object ExprParser extends ExprParser()(
-    new ExpressionSettings(AngleUnit.Radian, false, collection.mutable.Map.empty)
+    ExpressionSettings(AngleUnit.Radian, false, collection.mutable.Map.empty)
   )
 
   def compute(input: String, preview: Boolean): Try[String] = {
     val exprParser = new ExprParser()(
-      new ExpressionSettings(angleUnit, preview, variableStore)
+      ExpressionSettings(angleUnit, preview, variableStore)
     )
 
     exprParser(input).map(_.toString)
