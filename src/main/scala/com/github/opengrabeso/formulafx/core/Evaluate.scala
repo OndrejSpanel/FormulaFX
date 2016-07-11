@@ -13,7 +13,9 @@ object Evaluate {
   }
 
 
-  case class NumberResult(name: String, value: Number)
+  case class NumberResult(name: String, value: Number) {
+    override def toString: String = s"$name=$value"
+  }
 
   private var variableStore = collection.mutable.Map[String, Number]()
 
@@ -149,6 +151,6 @@ object Evaluate {
       ExpressionSettings(angleUnit, preview, variableStore)
     )
 
-    exprParser(input).map(_.toString)
+    exprParser.solve(input).map(_.toString)
   }
 }
