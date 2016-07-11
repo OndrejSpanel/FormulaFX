@@ -14,7 +14,7 @@ object Evaluate {
 
 
   case class NumberResult(name: String, value: Number) {
-    override def toString: String = s"$name=$value"
+    override def toString: String = if (name.nonEmpty) s"$name=$value" else s"$value"
   }
 
   private var variableStore = collection.mutable.Map[String, Number]()
