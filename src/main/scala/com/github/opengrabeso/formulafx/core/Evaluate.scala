@@ -12,6 +12,9 @@ object Evaluate {
     def format(f: Format) = Number(x, f)
   }
 
+
+  case class NumberResult(name: String, value: Number)
+
   private var variableStore = collection.mutable.Map[String, Number]()
 
   private var angleUnit: AngleUnit = AngleUnit.Radian
@@ -111,7 +114,7 @@ object Evaluate {
 
     def expr: Parser[Item] = term ~ rep(addOperators ~ term) ^^ processOperators
 
-    def assign: Parser[Number] = (expr <~ "=") ~ expr ^^ {
+    def assign: Parser[NumberResult] = (expr <~ "=") ~ expr ^^ {
       case i ~ x =>
         val (iSolved, res) = solve(i, x)
         iSolved match {
@@ -119,20 +122,22 @@ object Evaluate {
             if (!settings.preview) {
               settings.variables += (varName -> res)
             }
-            res
+            NumberResult(varName, res)
           case _ =>
             throw new UnsupportedOperationException("Unable to solve equation")
         }
     }
 
-    def evaluateExpr: Parser[Number] = expr ^^ {_.value}
+    def evaluateExpr: Parser[NumberResult] = expr ^^ {x => NumberResult("", x.value)}
 
     def command = assign | evaluateExpr
 
-    def apply(input: String): Try[Number] = Try {parseAll(command, input)}.map {
+    def solve(input: String): Try[NumberResult] = Try {parseAll(command, input)}.map {
       case Success(result, _) => result
       case failure: NoSuccess => throw new UnsupportedOperationException(failure.msg)
     }
+
+    def apply(input: String): Try[Number] = solve(input).map(_.value)
   }
 
   object ExprParser extends ExprParser()(
