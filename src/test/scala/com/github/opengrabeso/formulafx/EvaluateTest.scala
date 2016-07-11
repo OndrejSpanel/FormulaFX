@@ -1,5 +1,7 @@
 package com.github.opengrabeso.formulafx
 
+import core._
+
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Failure

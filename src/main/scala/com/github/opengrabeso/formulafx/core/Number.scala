@@ -1,4 +1,4 @@
-package com.github.opengrabeso.formulafx
+package com.github.opengrabeso.formulafx.core
 
 sealed trait Format {
   def score: Int

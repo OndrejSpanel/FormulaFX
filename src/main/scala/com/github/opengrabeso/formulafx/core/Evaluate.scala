@@ -1,4 +1,4 @@
-package com.github.opengrabeso.formulafx
+package com.github.opengrabeso.formulafx.core
 
 import scala.language.implicitConversions
 import scala.util.Try

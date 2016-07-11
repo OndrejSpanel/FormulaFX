@@ -1,5 +1,7 @@
 package com.github.opengrabeso.formulafx
 
+import core._
+
 import java.util.prefs.Preferences
 
 import scalafx.application.Platform

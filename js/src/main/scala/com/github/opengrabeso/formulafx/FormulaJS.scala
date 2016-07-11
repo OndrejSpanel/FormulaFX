@@ -1,6 +1,8 @@
 package com.github.opengrabeso
 package formulafx
 
+import core._
+
 import org.scalajs.dom._
 
 import scala.collection.mutable

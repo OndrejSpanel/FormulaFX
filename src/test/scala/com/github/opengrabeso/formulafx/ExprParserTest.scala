@@ -3,6 +3,7 @@ package com.github.opengrabeso.formulafx
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success, Try}
+import core._
 import Format._
 import org.scalactic.{Equivalence, ConversionCheckedTripleEquals}
 
