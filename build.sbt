@@ -7,7 +7,7 @@ libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.60-R9"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test"
 
 def generateIndexTask(index: String, suffix: String) = Def.task {
   val source = baseDirectory.value / "index.html"
@@ -43,20 +43,21 @@ lazy val projs = crossProject.crossType(
   settings(
     name := "FormulaFX",
     version := "0.0.8-alpha",
-    maxErrors := 1
+    maxErrors := 1,
+    scalacOptions := Seq("-unchecked", "-deprecation")
   ).
   jvmSettings(
     // Add JVM-specific settings here
     libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.60-R9",
     libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
     fork := true
   ).
   jsSettings(
     libraryDependencies += "org.scala-js" %%% "scala-parser-combinators" % "1.0.2",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0-M15" % "test",
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0" % "test",
     (fastOptJS in Compile) <<= (fastOptJS in Compile).dependsOn(generateIndexTask("index-fast.html","fastOpt")),
     (fullOptJS in Compile) <<= (fullOptJS in Compile).dependsOn(generateIndexTask("index.html","opt"))
 

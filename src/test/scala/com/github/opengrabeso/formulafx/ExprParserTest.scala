@@ -5,13 +5,13 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Success, Try}
 import core._
 import Format._
-import org.scalactic.{Equivalence, ConversionCheckedTripleEquals}
+import org.scalactic.{Equivalence, TypeCheckedTripleEquals}
 
 trait ExpressionTestUtils {
   def res(x: Double) = Success(Number(x, General))
 }
 
-class ExprParserTest extends FlatSpec with Matchers with ConversionCheckedTripleEquals with ExpressionTestUtils {
+class ExprParserTest extends FlatSpec with Matchers with TypeCheckedTripleEquals with ExpressionTestUtils {
 
   implicit val numberEq = new Equivalence[Try[Number]] {
     override def areEquivalent(a: Try[Number], b: Try[Number]) = (a, b) match {
