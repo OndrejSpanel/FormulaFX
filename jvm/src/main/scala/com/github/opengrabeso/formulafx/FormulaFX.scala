@@ -7,7 +7,7 @@ import core._
 import java.util.prefs.Preferences
 
 import javax.swing.table.{DefaultTableCellRenderer, DefaultTableModel, TableCellRenderer}
-import javax.swing.{JTable, SwingUtilities, UIManager}
+import javax.swing.{JTable, KeyStroke, SwingUtilities, UIManager}
 
 import scala.collection.mutable
 import scala.swing.event._
@@ -30,7 +30,8 @@ object FormulaFX extends SimpleSwingApplication {
   def top: MainFrame = new MainFrame {
     title = "Formula Fx - Expression Calculator"
 
-    minimumSize = new Dimension(800, 600)
+    minimumSize = new Dimension(100, 200)
+    preferredSize = new Dimension(200, 300)
 
     //private val icon = new Image("/calculator.png")
     //icons.add(icon)
@@ -95,6 +96,7 @@ object FormulaFX extends SimpleSwingApplication {
 
     val table  = new Table(model) {
       selection.elementMode = Table.ElementMode.Row
+      selection.intervalMode = Table.IntervalMode.Single
       peer.setDefaultRenderer(classOf[String], stripedRenderer)
     }
 
@@ -124,7 +126,7 @@ object FormulaFX extends SimpleSwingApplication {
       }
     }
 
-    listenTo(input)
+    listenTo(input, table.selection)
     reactions += {
       case EditDone(`input`) =>
         val resultText = Evaluate.compute(input.text, false)
@@ -137,16 +139,18 @@ object FormulaFX extends SimpleSwingApplication {
         }
       case ValueChanged(`input`) =>
         computeResult(true)
+      case ListSelectionChanged(`table`, range, live) =>
+        println(s"$range $live")
+      case TableRowsSelected(`table`, range, false) =>
+        input.text = tableData(range.head).text.trim
     }
     val statusBar = new Label
 
-    private val menuRadian = new RadioMenuItem("Radian") { item =>
-      //accelerator = new KeyCodeCombination(KeyCode.F9)
-      //onAction = handle {changeSettings{Evaluate.angleUnitRadian()}}
+    private val menuRadian = new RadioMenuItem("Radian") {
+      peer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0))
     }
     private val menuDegree = new RadioMenuItem("Degree") {
-      //accelerator = new KeyCodeCombination(KeyCode.F10)
-      //onAction = handle {changeSettings{Evaluate.angleUnitDegree()}}
+      peer.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0))
     }
     listenTo(menuRadian, menuDegree)
     reactions += {
@@ -160,19 +164,16 @@ object FormulaFX extends SimpleSwingApplication {
       computeResult(true)
 
     }
-    val menu = new MenuBar {
+    menuBar = new MenuBar {
+      contents +=  new Menu("File") {
+        contents += new MenuItem(new ActionWithCode("Clear history", {clearTable(); Evaluate.clear()}, KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK))
+      }
       contents += new Menu("Settings") {
         contents += new Menu("Angle unit") {
           new ButtonGroup(menuRadian, menuDegree).buttons.foreach(contents += _)
         }
       }
-
-      contents +=  new Menu("File") {
-        contents += new MenuItem(new ActionWithCode("Clear history", {clearTable(); Evaluate.clear()}, KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK))
-      }
     }
-
-    menuBar = menu
 
     def showStatus(): Unit = {
       statusBar.text = Evaluate.angleUnitName
@@ -235,7 +236,6 @@ object FormulaFX extends SimpleSwingApplication {
         contents += statusBar
       }
       add(bottom, South)
-      // TODO: statusBar
     }
 
     contents = pane
