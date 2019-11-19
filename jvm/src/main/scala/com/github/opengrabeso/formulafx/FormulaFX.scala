@@ -1,19 +1,21 @@
 package com.github.opengrabeso.formulafx
 
+import java.awt.Color
 import java.awt.event.{InputEvent, KeyEvent}
 
 import core._
 import java.util.prefs.Preferences
 
-import javax.swing.{SwingUtilities, UIManager}
+import javax.swing.table.{DefaultTableCellRenderer, DefaultTableModel, TableCellRenderer}
+import javax.swing.{JTable, SwingUtilities, UIManager}
 
 import scala.collection.mutable
 import scala.swing.event._
 import scala.swing._
 
-case class TableRowText(text: String)
-//noinspection ForwardReference
 object FormulaFX extends SimpleSwingApplication {
+  case class TableRowText(text: String)
+
   def prefs: Preferences = Preferences.userRoot().node(getClass.getPackage.getName.toLowerCase)
 
   override def startup(args: scala.Array[scala.Predef.String]): Unit = {
@@ -34,8 +36,16 @@ object FormulaFX extends SimpleSwingApplication {
     //icons.add(icon)
 
     val tableData = mutable.ArrayBuffer.empty[TableRowText]
+    val model: DefaultTableModel = new DefaultTableModel(Array[AnyRef]("Expression / result"), 0) {
+      override def isCellEditable(row: Int, column: Int) = false
+    }
 
-    def clearTable(): Unit = tableData.clear()
+    def clearTable(): Unit = {
+      tableData.clear()
+      while (model.getRowCount > 0) {
+        model.removeRow(0)
+      }
+    }
 
     private def rowId(i: Int) = s"row$i"
 
@@ -67,7 +77,37 @@ object FormulaFX extends SimpleSwingApplication {
       }
     }
 
+
+
+    val stripedRenderer: TableCellRenderer = new TableCellRenderer {
+      private val defRenderer = new DefaultTableCellRenderer
+      private val stripeRenderer: DefaultTableCellRenderer = new DefaultTableCellRenderer {
+        override def setBackground(c: Color) = {
+          val color = UIManager.getColor ( "Panel.background" )
+          super.setBackground(color.darker)
+        }
+      }
+      def getTableCellRendererComponent(table: JTable, value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int) = {
+        val r = if ( (row % 2) == 0) defRenderer else stripeRenderer
+        r.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+      }
+    }
+
+    val table  = new Table(model) {
+      selection.elementMode = Table.ElementMode.Row
+      peer.setDefaultRenderer(classOf[String], stripedRenderer)
+    }
+
+
+    def addRow(row: String): Unit = {
+      tableData += TableRowText(row)
+      table.model.asInstanceOf[DefaultTableModel].addRow(Array[AnyRef](row))
+    }
+
     loadSession()
+    for (r <- tableData) {
+      table.model.asInstanceOf[DefaultTableModel].addRow(Array[AnyRef](r.text))
+    }
 
 
     val result = new TextField {
@@ -89,8 +129,8 @@ object FormulaFX extends SimpleSwingApplication {
       case EditDone(`input`) =>
         val resultText = Evaluate.compute(input.text, false)
         resultText.map { res =>
-          tableData += TableRowText(input.text)
-          tableData += TableRowText("  " + res)
+          addRow(input.text)
+          addRow(" " + res)
           input.text = ""
           result.text = ""
           saveSession()
@@ -140,17 +180,10 @@ object FormulaFX extends SimpleSwingApplication {
       menuRadian.selected = Evaluate.angleUnitIsRadian
     }
 
-    val pane = new BorderPanel {
+    val pane: BorderPanel = new BorderPanel {
       import BorderPanel.Position._
 
-      val headers = Array.tabulate(10) {"Col-" + _}.toSeq
-      val rowData = Array.tabulate[Any](10, 10) {"" + _ + ":" + _}
 
-      val table  = new Table(rowData, headers) {
-        selection.elementMode = Table.ElementMode.Cell
-        //selection.intervalMode = Table.IntervalMode.Single
-
-      }
 
       /*
       val results = new TableView[TableRowText](tableData) { table =>
@@ -194,7 +227,7 @@ object FormulaFX extends SimpleSwingApplication {
       center = results
 
        */
-      add(table, Center)
+      add(new ScrollPane(table), Center)
 
       val bottom = new BoxPanel(Orientation.Vertical) {
         contents += input
