@@ -1,4 +1,4 @@
-import org.scalajs.sbtplugin.cross.CrossType
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 scalaVersion in ThisBuild := "2.11.8"
 
@@ -29,38 +29,28 @@ lazy val root = project.in(file(".")).
     publishLocal := {}
   )
 
-lazy val myCrossType = new CrossType {
-  // similar to CrossType.Full, but with a different sharedSrcDir
-  def projectDir(crossBase: File, projectType: String): File = crossBase / projectType
-
-  def sharedSrcDir(projectBase: File, conf: String): Option[File] = Some(projectBase.getParentFile / "src" / conf / "scala")
-}
-
-lazy val projs = crossProject.crossType(
-  myCrossType
-).
-  in(file(".")).
-  settings(
+lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
+  .in(file("."))
+  .settings(
     name := "FormulaFX",
     version := "0.0.8-alpha",
     maxErrors := 1,
     scalacOptions := Seq("-unchecked", "-deprecation")
-  ).
-  jvmSettings(
+  )
+  .jvmSettings(
     // Add JVM-specific settings here
     libraryDependencies += "org.scalafx" %% "scalafx" % "8.0.60-R9",
     libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.0" % "test",
     // Fork a new JVM for 'run' and 'test:run', to avoid JavaFX double initialization problems
     fork := true
-  ).
-  jsSettings(
+  )
+  .jsSettings(
     libraryDependencies += "org.scala-js" %%% "scala-parser-combinators" % "1.0.2",
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0",
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.0" % "test",
-    (fastOptJS in Compile) <<= (fastOptJS in Compile).dependsOn(generateIndexTask("index-fast.html","fastOpt")),
-    (fullOptJS in Compile) <<= (fullOptJS in Compile).dependsOn(generateIndexTask("index.html","opt"))
-
+    (fastOptJS in Compile) := (fastOptJS in Compile).dependsOn(generateIndexTask("index-fast.html","fastOpt")).value,
+    (fullOptJS in Compile) := (fullOptJS in Compile).dependsOn(generateIndexTask("index.html","opt")).value
   )
 
 lazy val pJVM = projs.jvm
