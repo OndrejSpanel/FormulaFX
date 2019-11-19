@@ -5,12 +5,11 @@ import java.awt.event.{InputEvent, KeyEvent}
 import core._
 import java.util.prefs.Preferences
 
-import javax.swing.text.TableView
 import javax.swing.{SwingUtilities, UIManager}
 
 import scala.collection.mutable
-import scala.swing.event.{EditDone, ValueChanged}
-import scala.swing.{BorderPanel, CheckMenuItem, Dimension, Label, MainFrame, Menu, MenuBar, MenuItem, SimpleSwingApplication, TextField, TextPane}
+import scala.swing.event._
+import scala.swing._
 
 case class TableRowText(text: String)
 //noinspection ForwardReference
@@ -101,13 +100,19 @@ object FormulaFX extends SimpleSwingApplication {
     }
     val statusBar = new Label
 
-    private val menuRadian = new CheckMenuItem("Radian") {
+    private val menuRadian = new RadioMenuItem("Radian") { item =>
       //accelerator = new KeyCodeCombination(KeyCode.F9)
       //onAction = handle {changeSettings{Evaluate.angleUnitRadian()}}
     }
-    private val menuDegree = new CheckMenuItem("Degree") {
+    private val menuDegree = new RadioMenuItem("Degree") {
       //accelerator = new KeyCodeCombination(KeyCode.F10)
       //onAction = handle {changeSettings{Evaluate.angleUnitDegree()}}
+    }
+    listenTo(menuRadian, menuDegree)
+    reactions += {
+      case ButtonClicked(`menuRadian`) | ButtonClicked(`menuDegree`) =>
+        if (menuRadian.selected) changeSettings(Evaluate.angleUnitRadian())
+        else changeSettings(Evaluate.angleUnitDegree())
     }
     def changeSettings(change: => Unit): Unit = {
       change
@@ -118,8 +123,7 @@ object FormulaFX extends SimpleSwingApplication {
     val menu = new MenuBar {
       contents += new Menu("Settings") {
         contents += new Menu("Angle unit") {
-          contents += menuRadian
-          contents += menuDegree
+          new ButtonGroup(menuRadian, menuDegree).buttons.foreach(contents += _)
         }
       }
 
@@ -138,6 +142,15 @@ object FormulaFX extends SimpleSwingApplication {
 
     val pane = new BorderPanel {
       import BorderPanel.Position._
+
+      val headers = Array.tabulate(10) {"Col-" + _}.toSeq
+      val rowData = Array.tabulate[Any](10, 10) {"" + _ + ":" + _}
+
+      val table  = new Table(rowData, headers) {
+        selection.elementMode = Table.ElementMode.Cell
+        //selection.intervalMode = Table.IntervalMode.Single
+
+      }
 
       /*
       val results = new TableView[TableRowText](tableData) { table =>
@@ -181,8 +194,14 @@ object FormulaFX extends SimpleSwingApplication {
       center = results
 
        */
-      add(input, Center)
-      add(result, South)
+      add(table, Center)
+
+      val bottom = new BoxPanel(Orientation.Vertical) {
+        contents += input
+        contents += result
+        contents += statusBar
+      }
+      add(bottom, South)
       // TODO: statusBar
     }
 
