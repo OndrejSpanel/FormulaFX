@@ -15,7 +15,7 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.13.8",
-  version := "0.1.2-alpha",
+  version := "0.2.0-beta",
   libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
   libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0" % "test"
 )
@@ -38,7 +38,7 @@ lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
   .jvmSettings(
     // Add JVM-specific settings here
     libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1",
-    assemblyJarName := "FormulaFX"
+    assemblyJarName := "FormulaFX.jar"
   )
   .jsSettings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
