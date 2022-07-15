@@ -21,4 +21,4 @@ jobs:
       run: |
         git config --add github.actor OndrejSpanel
         git config --add github.token ${{ secrets.GITHUB_TOKEN }}
-        sbt projsJVM/test projsJS/test
+        sbt projsJVM/test
