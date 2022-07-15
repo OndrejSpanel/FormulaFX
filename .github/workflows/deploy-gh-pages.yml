@@ -24,7 +24,7 @@ jobs:
           git config --add github.token ${{ secrets.GITHUB_TOKEN }}
           sbt projsJS/fullOptJS
           mkdir public
-          cp js/target/scala-2.13/scalafromjs-opt.js public/.
+          cp js/target/scala-2.13/formulafx-opt.js public/.
           cp js/target/scala-2.13/index.html public/.
       - name: Deploy
         if: success()
