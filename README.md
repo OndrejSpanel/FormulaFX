@@ -1,7 +1,7 @@
 # FormulaFX
 Expression (line based) calculator
 
-Online version at [FormulaFX live](https://ondrejspanel.github.io/FormulaFX/live)
+Online version at [FormulaFX live](https://ondrejspanel.github.io/FormulaFX)
 
 Number format:
 ----
