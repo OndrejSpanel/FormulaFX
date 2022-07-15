@@ -85,7 +85,7 @@ object Evaluate {
       case (hours ~ mins ~ sec) => hours.toDouble * 3600 + mins.toDouble * 60 + sec.toDouble format Hours
     }
 
-    def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16), Hex) }
+    def hexNum: Parser[LiteralItem] = """0[xX][0-9a-fA-F]+""".r ^^ { s => Number(java.lang.Long.parseUnsignedLong(s.drop(2), 16).toDouble, Hex) }
     def percent: Parser[LiteralItem] = floatingPointNumber <~ "%" ^^ { x => Number(x.toDouble * 0.01, General)} // consider percent format?
 
     override def ident = """[a-zA-Z_]+\w*""".r

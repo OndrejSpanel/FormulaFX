@@ -43,7 +43,7 @@ object Number {
     def fractionPartParams(digits: Int) = NumberPartParams(1, Math.pow(10, digits), fractionFormatter(_, digits))
 
     val scale = Math.pow(10, maxLen)
-    val raw = NumberPart((x * scale).round, fractionPartParams(maxLen))
+    val raw = NumberPart((x * scale).round.toDouble, fractionPartParams(maxLen))
 
     def dropTailZeroes(p: NumberPart, maxLen: Int): NumberPart = {
       if (p.value % 10 == 0 && p.value > 0) {

@@ -1,7 +1,5 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-ThisBuild / scalaVersion  := "2.12.10"
-
 def generateIndexTask(index: String, suffix: String) = Def.task {
   val source = baseDirectory.value / "index.html"
   val target = (Compile / crossTarget).value / index
@@ -16,7 +14,7 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 }
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.12.10",
+  scalaVersion := "2.13.8",
   version := "0.1.2-alpha",
   libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
   libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0" % "test"
@@ -24,6 +22,7 @@ lazy val commonSettings = Seq(
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
   settings(
+    name := "FormulaFX",
     publish := {},
     publishLocal := {}
   )
@@ -38,7 +37,8 @@ lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
   )
   .jvmSettings(
     // Add JVM-specific settings here
-    libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1"
+    libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1",
+    assemblyJarName := "FormulaFX"
   )
   .jsSettings(
     libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",

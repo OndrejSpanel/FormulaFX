@@ -3,6 +3,7 @@ package com.github.opengrabeso.formulafx.core
 import Format._
 
 import scala.language.implicitConversions
+import scala.util.chaining._
 
 sealed trait AngleUnit {
   def toRadians(x: Double): Double
@@ -206,7 +207,7 @@ trait Expression {
   }
 
   def solveWithUnknown(left: Item, right: Item, unknownName: String)(implicit settings: ExpressionSettings): (Item, Number) = {
-    val settingsWithUnknown = settings.copy(variables = settings.variables - unknownName)
+    val settingsWithUnknown = settings.copy(variables = settings.variables.clone().tap(_ -= unknownName))
     solve(left, right)(settingsWithUnknown)
   }
 
