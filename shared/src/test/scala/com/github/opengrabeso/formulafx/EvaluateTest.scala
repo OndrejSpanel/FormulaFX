@@ -2,11 +2,12 @@ package com.github.opengrabeso.formulafx
 
 import core._
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.Failure
 
-class EvaluateTest extends FlatSpec with Matchers with ExpressionTestUtils {
+class EvaluateTest extends AnyFlatSpec with Matchers with ExpressionTestUtils {
   behavior of "Evaluator with variables"
 
   def createVariables = collection.mutable.Map[String, Number]()

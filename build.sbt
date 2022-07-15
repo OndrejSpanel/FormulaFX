@@ -1,10 +1,10 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-scalaVersion in ThisBuild := "2.12.10"
+ThisBuild / scalaVersion  := "2.12.10"
 
 def generateIndexTask(index: String, suffix: String) = Def.task {
   val source = baseDirectory.value / "index.html"
-  val target = (crossTarget in Compile).value / index
+  val target = (Compile / crossTarget).value / index
   val log = streams.value.log
   IO.writeLines(target,
     IO.readLines(source).map {
@@ -18,8 +18,8 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 lazy val commonSettings = Seq(
   scalaVersion := "2.12.10",
   version := "0.1.2-alpha",
-  libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-  libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0" % "test"
 )
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
@@ -41,9 +41,9 @@ lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
     libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1"
   )
   .jsSettings(
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.7",
-    (fastOptJS in Compile) := (fastOptJS in Compile).dependsOn(generateIndexTask("index-fast.html","fastOpt")).value,
-    (fullOptJS in Compile) := (fullOptJS in Compile).dependsOn(generateIndexTask("index.html","opt")).value
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+    (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(generateIndexTask("index-fast.html","fastOpt")).value,
+    (Compile / fullOptJS) := (Compile / fullOptJS).dependsOn(generateIndexTask("index.html","opt")).value
   )
 
 lazy val pJVM = projs.jvm

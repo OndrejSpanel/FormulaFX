@@ -1,10 +1,11 @@
 package com.github.opengrabeso.formulafx
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import core._
 import Format._
 
-class NumberTest extends FlatSpec with Matchers {
+class NumberTest extends AnyFlatSpec with Matchers {
 
   behavior of "NumberTest"
 

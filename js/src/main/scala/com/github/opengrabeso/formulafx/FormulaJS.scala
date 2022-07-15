@@ -2,18 +2,16 @@ package com.github.opengrabeso
 package formulafx
 
 import core._
-
 import org.scalajs.dom._
 
 import scala.collection.mutable
 import scala.scalajs.js
-import scala.scalajs.js.JSApp
-import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 import com.github.opengrabeso.js.JsUtils._
 import org.scalajs.dom
 
-@JSExport(name="FormulaJS")
-object FormulaJS extends JSApp {
+@JSExportTopLevel(name="FormulaJS")
+object FormulaJS {
 
   private val resPrefix = "&nbsp;&nbsp;"
 
@@ -22,7 +20,7 @@ object FormulaJS extends JSApp {
   import com.github.opengrabeso.js.Prefs._
 
 
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     println("Formula JS")
   }
 

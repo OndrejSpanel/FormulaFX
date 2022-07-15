@@ -1,6 +1,7 @@
 package com.github.opengrabeso.formulafx
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import scala.util.{Failure, Success, Try}
 import core._
@@ -11,7 +12,7 @@ trait ExpressionTestUtils {
   def res(x: Double) = Success(Number(x, General))
 }
 
-class ExprParserTest extends FlatSpec with Matchers with TypeCheckedTripleEquals with ExpressionTestUtils {
+class ExprParserTest extends AnyFlatSpec with Matchers with TypeCheckedTripleEquals with ExpressionTestUtils {
 
   implicit val numberEq = new Equivalence[Try[Number]] {
     override def areEquivalent(a: Try[Number], b: Try[Number]) = (a, b) match {
