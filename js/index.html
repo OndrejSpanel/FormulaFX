@@ -16,10 +16,10 @@
 <script type="text/javascript" src="{{target-js}}"></script>
 
 <p>
-  <button onclick="FormulaJS().reset()">Clear</button>
+  <button onclick="FormulaJS.reset()">Clear</button>
 </p>
 
-<table id="history" onclick="FormulaJS().tableClicked(event.target)">
+<table id="history" onclick="FormulaJS.tableClicked(event.target)">
   <tr>
     <th>Expression / Result</th>
     <!--<th>Pinned</th>-->
@@ -28,13 +28,13 @@
 
 
 <input id="eval" type="text" class="textInput"
-       onchange="FormulaJS().eval(this.value, false)"
-       oninput="FormulaJS().eval(this.value, true)"
+       onchange="FormulaJS.eval(this.value, false)"
+       oninput="FormulaJS.eval(this.value, true)"
 >
 
 <p id="result"></p>
 
-<script type="text/javascript">FormulaJS().loadSession()</script>
+<script type="text/javascript">FormulaJS.loadSession()</script>
 
 </body>
 </html>
