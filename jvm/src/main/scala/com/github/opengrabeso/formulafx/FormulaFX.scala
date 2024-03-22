@@ -139,8 +139,8 @@ object FormulaFX extends SimpleSwingApplication {
         }
       case ValueChanged(`input`) =>
         computeResult(true)
-      case ListSelectionChanged(`table`, range, live) =>
-        println(s"$range $live")
+      //case ListSelectionChanged(`table`, range, live) =>
+      //  println(s"$range $live")
       case TableRowsSelected(`table`, range, false) =>
         input.text = tableData(range.head).text.trim
     }

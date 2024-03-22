@@ -14,7 +14,7 @@ trait ExpressionTestUtils {
 
 class ExprParserTest extends AnyFlatSpec with Matchers with TypeCheckedTripleEquals with ExpressionTestUtils {
 
-  implicit val numberEq = new Equivalence[Try[Number]] {
+  implicit val numberEq: Equivalence[Try[Number]] = new Equivalence[Try[Number]] {
     override def areEquivalent(a: Try[Number], b: Try[Number]) = (a, b) match {
       case (Failure(_), Failure(_)) => true
       case (Failure(_), Success(_)) => false

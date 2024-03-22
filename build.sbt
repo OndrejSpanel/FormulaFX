@@ -14,10 +14,10 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 }
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.10",
+  scalaVersion := "3.3.3",
   version := "0.3.0",
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.1.1",
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.0" % "test"
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.3.0",
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.18" % "test"
 )
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
@@ -37,11 +37,11 @@ lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
   )
   .jvmSettings(
     // Add JVM-specific settings here
-    libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.1.1",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "3.0.0",
     assemblyJarName := "FormulaFX.jar"
   )
   .jsSettings(
-    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+    libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "2.8.0",
     (Compile / fastOptJS) := (Compile / fastOptJS).dependsOn(generateIndexTask("index-fast.html","fastOpt")).value,
     (Compile / fullOptJS) := (Compile / fullOptJS).dependsOn(generateIndexTask("index.html","opt")).value
   )
