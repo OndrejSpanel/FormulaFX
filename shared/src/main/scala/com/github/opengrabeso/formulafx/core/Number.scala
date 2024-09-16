@@ -3,7 +3,7 @@ package com.github.opengrabeso.formulafx.core
 sealed trait Format {
   def score: Int
 
-  def combine(that: Format) = if (that.score >= score) that else this
+  infix def combine(that: Format): Format = if (that.score >= score) that else this
 }
 
 object Format {
@@ -26,7 +26,9 @@ object Format {
 
 }
 
-import Format._
+import Format.*
+
+import scala.annotation.tailrec
 
 object Number {
   def fractionString(x: Double, maxLen: Int): NumberPart = {
@@ -73,6 +75,7 @@ object Number {
 
     def doCarry: NumberByParts = {
 
+      @tailrec
       def carry(todo: List[NumberPart], isCarry: Boolean, done: List[NumberPart]): List[NumberPart] = {
         todo match {
           case Nil => done
