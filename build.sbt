@@ -33,7 +33,7 @@ lazy val projs = crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Full)
     commonSettings,
     name := "FormulaFX",
     maxErrors := 1,
-    scalacOptions := Seq("-unchecked", "-deprecation")
+    scalacOptions ++= Seq("-unchecked", "-deprecation")
   )
   .jvmSettings(
     // Add JVM-specific settings here
