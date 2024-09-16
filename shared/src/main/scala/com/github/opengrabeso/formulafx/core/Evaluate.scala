@@ -8,8 +8,8 @@ object Evaluate {
   import Format._
 
   implicit def doubleToNumber(x: Double): Number = Number(x, General)
-  implicit class FormattedNumber(val x: Double) extends AnyVal {
-    def format(f: Format) = Number(x, f)
+  extension (x: Double) {
+    infix def format(f: Format) = Number(x, f)
   }
 
 
@@ -98,7 +98,7 @@ object Evaluate {
     def powOperators =
       operator("^" , Expression.operator_^)
 
-    def mulOperators = 
+    def mulOperators =
       operator("*" , Expression.operator_*) |
       operator("/" , Expression.operator_/)
 

@@ -47,6 +47,7 @@ object Number {
     val scale = Math.pow(10, maxLen)
     val raw = NumberPart((x * scale).round.toDouble, fractionPartParams(maxLen))
 
+    @tailrec
     def dropTailZeroes(p: NumberPart, maxLen: Int): NumberPart = {
       if (p.value % 10 == 0 && p.value > 0) {
         dropTailZeroes(p.copy(p.value / 10, fractionPartParams(maxLen-1)), maxLen-1)
@@ -159,7 +160,7 @@ object Number {
 case class Number(x: Double, f: Format) {
   import Number._
 
-  def combineFormat(b: Number): Format = f combine b.f
+  infix def combineFormat(b: Number): Format = f combine b.f
 
   override def toString = f match {
     case Minutes => toMinutes(x)
