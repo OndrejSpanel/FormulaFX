@@ -14,10 +14,10 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 }
 
 lazy val commonSettings = Seq(
-  scalaVersion := "3.3.3",
-  version := "0.3.0",
-  libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.3.0",
-  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.18" % "test"
+  scalaVersion := "3.5.0",
+  version := "0.4.0",
+  libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
+  libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % "test"
 )
 lazy val root = project.in(file(".")).
   aggregate(pJVM, pJS).
