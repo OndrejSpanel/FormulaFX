@@ -25,8 +25,8 @@ jobs:
           git config --add github.token ${{ secrets.GITHUB_TOKEN }}
           sbt projsJS/fullOptJS
           mkdir public
-          cp js/target/scala-3.5.0/formulafx-opt.js public/.
-          cp js/target/scala-3.5.0/index.html public/.
+          cp js/target/scala-3.7.1/formulafx-opt.js public/.
+          cp js/target/scala-3.7.1/index.html public/.
       - name: Deploy
         if: success()
         uses: crazy-max/ghaction-github-pages@v1
