@@ -208,7 +208,7 @@ trait Expression {
 
   def solveWithUnknown(left: Item, right: Item, unknownName: String)(implicit settings: ExpressionSettings): (Item, Number) = {
     val settingsWithUnknown = settings.copy(variables = settings.variables.clone().tap(_ -= unknownName))
-    solve(left, right)(settingsWithUnknown)
+    solve(left, right)(using settingsWithUnknown)
   }
 
   def solve(left: Item, right: Item)(implicit settings: ExpressionSettings): (Item, Number) = {

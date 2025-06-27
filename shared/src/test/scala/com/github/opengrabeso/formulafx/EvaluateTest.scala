@@ -13,7 +13,7 @@ class EvaluateTest extends AnyFlatSpec with Matchers with ExpressionTestUtils {
   def createVariables = collection.mutable.Map[String, Number]()
 
   def createEvaluator = new Evaluate.ExprParser()(
-    new ExpressionSettings(AngleUnit.Radian, false, createVariables)
+    using ExpressionSettings(AngleUnit.Radian, false, createVariables)
   )
 
   it should "define a variable" in {
@@ -39,7 +39,7 @@ class EvaluateTest extends AnyFlatSpec with Matchers with ExpressionTestUtils {
 
   it should "reject equation with multiple variables" in {
     val eval = createEvaluator
-    eval("a=b") shouldBe a[Failure[_]]
+    eval("a=b") shouldBe a[Failure[?]]
   }
 
   private def computeEquation(eq: String) = {
@@ -83,7 +83,7 @@ class EvaluateTest extends AnyFlatSpec with Matchers with ExpressionTestUtils {
   }
 
   it should "not invert non-inversible functions" in {
-    computeEquation("round(x) = 0") shouldBe a[Failure[_]]
-    computeEquation("ceil(x) = 0") shouldBe a[Failure[_]]
+    computeEquation("round(x) = 0") shouldBe a[Failure[?]]
+    computeEquation("ceil(x) = 0") shouldBe a[Failure[?]]
   }
 }

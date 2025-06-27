@@ -143,12 +143,12 @@ object Evaluate {
   }
 
   object ExprParser extends ExprParser()(
-    ExpressionSettings(AngleUnit.Radian, false, collection.mutable.Map.empty)
+    using ExpressionSettings(AngleUnit.Radian, false, collection.mutable.Map.empty)
   )
 
   def compute(input: String, preview: Boolean): Try[String] = {
     val exprParser = new ExprParser()(
-      ExpressionSettings(angleUnit, preview, variableStore)
+      using ExpressionSettings(angleUnit, preview, variableStore)
     )
 
     exprParser.solve(input).map(_.toString)

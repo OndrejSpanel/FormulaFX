@@ -34,10 +34,10 @@ class ExprParserTest extends AnyFlatSpec with Matchers with TypeCheckedTripleEqu
   }
 
   it should "reject invalid expressions" in {
-    Evaluate.ExprParser("1+*2") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("1+)3") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("(1+)3") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("(13") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("1+*2") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("1+)3") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("(1+)3") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("(13") shouldBe a[Failure[?]]
   }
 
   it should "compute expressions with correct associativity" in {
@@ -72,17 +72,17 @@ class ExprParserTest extends AnyFlatSpec with Matchers with TypeCheckedTripleEqu
   }
 
   it should "fail on malformed expressions" in {
-    Evaluate.ExprParser("1 + / 2") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("1 +") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("/ 2") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("1 + / 2") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("1 +") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("/ 2") shouldBe a[Failure[?]]
   }
 
   it should "fail when accessing undefined variable" in {
-    Evaluate.ExprParser("unknown + 10") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("unknown + 10") shouldBe a[Failure[?]]
   }
 
   it should "fail when calling an undefined function" in {
-    Evaluate.ExprParser("unknown(10)") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("unknown(10)") shouldBe a[Failure[?]]
   }
 
   it should "parse valid hexadecimal numbers" in {
@@ -93,8 +93,8 @@ class ExprParserTest extends AnyFlatSpec with Matchers with TypeCheckedTripleEqu
   }
 
   it should "reject invalid hexadecimal numbers" in {
-    Evaluate.ExprParser("0x1Z") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("0x ff") shouldBe a[Failure[_]]
-    Evaluate.ExprParser("0xxff") shouldBe a[Failure[_]]
+    Evaluate.ExprParser("0x1Z") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("0x ff") shouldBe a[Failure[?]]
+    Evaluate.ExprParser("0xxff") shouldBe a[Failure[?]]
   }
 }
