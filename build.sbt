@@ -14,8 +14,8 @@ def generateIndexTask(index: String, suffix: String) = Def.task {
 }
 
 lazy val commonSettings = Seq(
-  scalaVersion := "3.5.0",
-  version := "0.4.0",
+  scalaVersion := "3.7.1",
+  version := "0.4.1",
   libraryDependencies += "org.scala-lang.modules" %%% "scala-parser-combinators" % "2.4.0",
   libraryDependencies += "org.scalatest" %%% "scalatest" % "3.2.19" % "test"
 )
