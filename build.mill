@@ -1,0 +1,78 @@
+import mill._, scalalib._, scalajslib._
+
+trait AppScalaModule extends SbtModule {
+  def scalaVersion = "3.7.1"
+  //override def version() = "0.4.1"
+}
+
+trait AppScalaJSModule extends AppScalaModule with ScalaJSModule {
+  def scalaJSVersion = "1.19.0"
+}
+
+object `package` extends RootModule {
+
+  object shared extends Module {
+    trait SharedModule extends AppScalaModule with PlatformScalaModule {
+      def ivyDeps = Agg(
+        ivy"org.scala-lang.modules::scala-parser-combinators:2.4.0"
+      )
+    }
+
+    object jvm extends SharedModule
+    object js extends SharedModule with AppScalaJSModule
+  }
+
+  object jvm extends AppScalaModule {
+    def moduleDeps = Seq(shared.jvm)
+    def ivyDeps = Agg(
+      ivy"org.scala-lang.modules::scala-swing:3.0.0"
+    )
+    def assemblyJarName = "FormulaFX.jar"
+  }
+
+
+  /*
+  object js extends AppScalaJSModule {
+    def scalaJSVersion = "1.19.0"
+    def moduleDeps = Seq(shared.js)
+    def ivyDeps = Agg(
+      ivy"org.scala-js::scalajs-dom:2.8.0"
+    )
+
+    /*
+    override def fastOpt = Task {
+      val indexTask = generateIndexTask("index-fast.html", "fastOpt")
+      super.fastOpt // Ensure fastOptJS is executed
+      indexTask
+    }
+
+    override def fullOpt = Task {
+      val indexTask = generateIndexTask("index.html", "opt")
+      super.fullOpt // Ensure fullOptJS is executed
+      indexTask
+    }
+
+    def generateIndexTask(index: String, suffix: String) = Task {
+      val source = os.pwd / "index.html"
+      val target = T.dest / index
+      val content = os.read.lines(source).map { line =>
+        line.replace("{{target-js}}", s"formulafx-$suffix.js")
+      }
+      os.write(target, content.mkString("\n"))
+      T.log.info(s"Generated $index with suffix: $suffix")
+      target
+    }
+     */
+  }
+
+   */
+
+  /*
+  object test extends ScalaTests {
+    def ivyDeps = Agg(
+      ivy"org.scalatest::scalatest:3.2.19"
+    )
+  }
+
+   */
+}
