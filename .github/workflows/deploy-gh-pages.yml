@@ -16,20 +16,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - uses: sbt/setup-sbt@v1
       - name: Build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --add github.actor OndrejSpanel
-          git config --add github.token ${{ secrets.GITHUB_TOKEN }}
-          sbt projsJS/fullOptJS
-          mkdir public
-          cp js/target/scala-3.7.1/formulafx-opt.js public/.
-          cp js/target/scala-3.7.1/index.html public/.
+          chmod +x ./mill
+          ./mill js.bundleOpt
+          cp out/js/fullLinkJS.dest/main.js public/.
+          cp out/js/generateIndexOpt.dest/index.html public/.
       - name: Deploy
         if: success()
-        uses: crazy-max/ghaction-github-pages@v1
+        uses: crazy-max/ghaction-github-pages@v4
         with:
           target_branch: gh-pages
           build_dir: public
