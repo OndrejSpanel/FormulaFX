@@ -7,7 +7,7 @@ import scalajslib._
 
 trait AppScalaModule extends SbtModule with PublishModule {
   def scalaVersion = "3.7.1"
-  override def publishVersion: T[String] = T("0.4.0")
+  override def publishVersion: T[String] = T("0.4.1")
   override def pomSettings: T[PomSettings] = T(
     PomSettings(
       description = "Expression (line based) calculator",
