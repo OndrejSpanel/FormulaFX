@@ -1,8 +1,11 @@
-import mill._, scalalib._, scalajslib._
+import mill._
+import mill.api.Ctx
+import scalalib._
+import scalajslib._
 
 trait AppScalaModule extends SbtModule {
   def scalaVersion = "3.7.1"
-  //override def version() = "0.4.1"
+  //override def version = "0.4.1"
 }
 
 trait AppScalaJSModule extends AppScalaModule with ScalaJSModule {
@@ -14,12 +17,19 @@ object `package` extends RootModule {
   object shared extends Module {
     trait SharedModule extends AppScalaModule with PlatformScalaModule {
       def ivyDeps = Agg(
-        ivy"org.scala-lang.modules::scala-parser-combinators:2.4.0"
+        ivy"org.scala-lang.modules::scala-parser-combinators::2.4.0"
       )
     }
 
     object jvm extends SharedModule
     object js extends SharedModule with AppScalaJSModule
+
+    object jvmTest extends jvm.SbtTests {
+      def ivyDeps = Agg(
+        ivy"org.scalatest::scalatest:3.2.19"
+      )
+      override def testFramework: T[String] = "org.scalatest.tools.Framework"
+    }
   }
 
   object jvm extends AppScalaModule {
@@ -27,52 +37,44 @@ object `package` extends RootModule {
     def ivyDeps = Agg(
       ivy"org.scala-lang.modules::scala-swing:3.0.0"
     )
-    def assemblyJarName = "FormulaFX.jar"
+
+    def assembly: T[PathRef] = T {
+      val dest = T.dest / "FormulaFx.jar"
+      os.copy(super.assembly().path, dest)
+      PathRef(dest)
+    }
   }
 
-
-  /*
   object js extends AppScalaJSModule {
     def scalaJSVersion = "1.19.0"
     def moduleDeps = Seq(shared.js)
     def ivyDeps = Agg(
-      ivy"org.scala-js::scalajs-dom:2.8.0"
+      ivy"org.scala-js::scalajs-dom::2.8.0"
     )
 
-    /*
-    override def fastOpt = Task {
-      val indexTask = generateIndexTask("index-fast.html", "fastOpt")
-      super.fastOpt // Ensure fastOptJS is executed
-      indexTask
-    }
+    def generateIndexOpt: T[os.Path] = T(generateIndex("index.html", "opt"))
 
-    override def fullOpt = Task {
-      val indexTask = generateIndexTask("index.html", "opt")
-      super.fullOpt // Ensure fullOptJS is executed
-      indexTask
-    }
+    def generateIndexFastOpt: T[os.Path] = T(generateIndex("index-fast.html", "fastOpt"))
 
-    def generateIndexTask(index: String, suffix: String) = Task {
-      val source = os.pwd / "index.html"
+    def generateIndex(index: String, suffix: String)(implicit ctx: Ctx): os.Path = {
+      val source = ctx.workspace / "js" / "index.html"
       val target = T.dest / index
+      ctx.log.info(s"Index $source -> $target")
+      os.makeDir.all(T.dest)
       val content = os.read.lines(source).map { line =>
         line.replace("{{target-js}}", s"formulafx-$suffix.js")
       }
       os.write(target, content.mkString("\n"))
-      T.log.info(s"Generated $index with suffix: $suffix")
+      ctx.log.info(s"Generated $index with suffix: $suffix")
       target
     }
-     */
+
+    def bundleFast = T {
+      (fastLinkJS(), generateIndexFastOpt())
+    }
+
+    def bundleOpt = T {
+      (fullLinkJS(), generateIndexOpt())
+    }
   }
-
-   */
-
-  /*
-  object test extends ScalaTests {
-    def ivyDeps = Agg(
-      ivy"org.scalatest::scalatest:3.2.19"
-    )
-  }
-
-   */
 }
