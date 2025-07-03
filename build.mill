@@ -1,6 +1,7 @@
 import mill._
 import mill.api.Ctx
 import mill.javalib.publish.License
+import mill.scalalib.Assembly.Rule
 import mill.scalalib.publish.{Developer, PomSettings, VersionControl}
 import scalalib._
 import scalajslib._
@@ -57,6 +58,9 @@ object `package` extends RootModule {
     )
 
     override def prependShellScript: T[String] = T { "" }
+    override def assemblyRules = super.assemblyRules ++ Seq(
+      Rule.ExcludePattern(".*\\.tasty")
+    )
 
     def assembly: T[PathRef] = T {
       val dest = T.dest / "FormulaFx.jar"
