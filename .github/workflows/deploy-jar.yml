@@ -16,18 +16,14 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - uses: sbt/setup-sbt@v1
       - name: Build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --add github.actor OndrejSpanel
-          git config --add github.token ${{ secrets.GITHUB_TOKEN }}
-          sbt projsJVM/assembly
+          chmod +x ./mill
+          ./mill jvm.assembly
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
-          file: jvm/target/scala-3.7.1/FormulaFX.jar
+          file: out/jvm/assembly.test/FormulaFX.jar
           tag: ${{ github.ref }}
           overwrite: true
