@@ -1,11 +1,29 @@
 import mill._
 import mill.api.Ctx
+import mill.javalib.publish.License
+import mill.scalalib.publish.{Developer, PomSettings, VersionControl}
 import scalalib._
 import scalajslib._
 
-trait AppScalaModule extends SbtModule {
+trait AppScalaModule extends SbtModule with PublishModule {
   def scalaVersion = "3.7.1"
-  //override def version = "0.4.1"
+  override def publishVersion: T[String] = T("0.4.0")
+  override def pomSettings: T[PomSettings] = T(
+    PomSettings(
+      description = "Expression (line based) calculator",
+      organization = "com.github.ondrejspanel",
+      url = "https://github.com/OndrejSpanel/FormulaFX",
+      licenses = Seq(License.`GPL-2.0+`),
+      versionControl = VersionControl.github("OndrejSpanel", "FormulaFX"),
+      developers = Seq(
+        Developer(
+          id = "OndrejSpanel",
+          name = "Ondřej Španěl",
+          url = "https://github.com/OndrejSpanel"
+        )
+      )
+    )
+  )
 }
 
 trait AppScalaJSModule extends AppScalaModule with ScalaJSModule {
@@ -37,6 +55,8 @@ object `package` extends RootModule {
     def ivyDeps = Agg(
       ivy"org.scala-lang.modules::scala-swing:3.0.0"
     )
+
+    override def prependShellScript: T[String] = T { "" }
 
     def assembly: T[PathRef] = T {
       val dest = T.dest / "FormulaFx.jar"
