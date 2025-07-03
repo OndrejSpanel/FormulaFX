@@ -19,7 +19,7 @@ jobs:
       - name: Build
         run: |
           chmod +x ./mill
-          ./mill js.bundleOpt\
+          ./mill js.bundleOpt
           mkdir public
           cp out/js/fullLinkJS.dest/main.js public/.
           cp out/js/generateIndexOpt.dest/index.html public/.
