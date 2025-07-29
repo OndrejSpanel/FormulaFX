@@ -1,17 +1,18 @@
-//| mill-version: 1.0.2
+//| mill-version: 1.0.1
 //| mill-jvm-version: 11
-import mill._
-import mill.api.Ctx
+import mill.*
+import mill.T
+import mill.javalib.TestModule.ScalaTest
 import mill.javalib.publish.License
 import mill.scalalib.Assembly.Rule
 import mill.scalalib.publish.{Developer, PomSettings, VersionControl}
-import scalalib._
-import scalajslib._
+import scalalib.*
+import scalajslib.*
 
 trait AppScalaModule extends SbtModule with PublishModule {
   def scalaVersion = "3.7.1"
-  override def publishVersion: T[String] = T("0.4.2")
-  override def pomSettings: T[PomSettings] = T(
+  override def publishVersion: T[String] = Task("0.4.2")
+  override def pomSettings: T[PomSettings] = Task(
     PomSettings(
       description = "Expression (line based) calculator",
       organization = "com.github.ondrejspanel",
@@ -33,60 +34,57 @@ trait AppScalaJSModule extends AppScalaModule with ScalaJSModule {
   def scalaJSVersion = "1.19.0"
 }
 
-object `package` extends RootModule {
+object `package` extends Module {
 
   object shared extends Module {
     trait SharedModule extends AppScalaModule with PlatformScalaModule {
-      def ivyDeps = Agg(
-        ivy"org.scala-lang.modules::scala-parser-combinators::2.4.0"
+      override def mvnDeps = Seq(
+        mvn"org.scala-lang.modules::scala-parser-combinators::2.4.0"
       )
     }
 
-    object jvm extends SharedModule
+    object jvm extends SharedModule {
+      object test extends jvm.SbtTests with ScalaTest {
+        override def scalaTestVersion: T[String] = Task("3.2.19")
+      }
+    }
     object js extends SharedModule with AppScalaJSModule
-
-    object jvmTest extends jvm.SbtTests {
-      def ivyDeps = Agg(
-        ivy"org.scalatest::scalatest:3.2.19"
-      )
-      override def testFramework: T[String] = "org.scalatest.tools.Framework"
-    }
   }
 
   object jvm extends AppScalaModule {
-    def moduleDeps = Seq(shared.jvm)
-    def ivyDeps = Agg(
-      ivy"org.scala-lang.modules::scala-swing:3.0.0"
+    override def moduleDeps = Seq(shared.jvm)
+    override def mvnDeps = Seq(
+      mvn"org.scala-lang.modules::scala-swing:3.0.0"
     )
 
-    override def prependShellScript: T[String] = T { "" }
+    override def prependShellScript: T[String] = Task { "" }
     override def assemblyRules = super.assemblyRules ++ Seq(
       Rule.ExcludePattern(".*\\.tasty")
     )
 
-    def assembly: T[PathRef] = T {
-      val dest = T.dest / "FormulaFx.jar"
+    def assembly: T[PathRef] = Task {
+      val dest = Task.dest / "FormulaFx.jar"
       os.copy(super.assembly().path, dest)
       PathRef(dest)
     }
   }
 
   object js extends AppScalaJSModule {
-    def scalaJSVersion = "1.19.0"
-    def moduleDeps = Seq(shared.js)
-    def ivyDeps = Agg(
-      ivy"org.scala-js::scalajs-dom::2.8.0"
+    override def scalaJSVersion = "1.19.0"
+    override def moduleDeps = Seq(shared.js)
+    override def mvnDeps = Seq(
+      mvn"org.scala-js::scalajs-dom::2.8.0"
     )
 
-    def generateIndexOpt: T[os.Path] = T(generateIndex("index.html", "opt"))
+    def generateIndexOpt: T[os.Path] = Task(generateIndex("index.html", "opt"))
 
-    def generateIndexFastOpt: T[os.Path] = T(generateIndex("index-fast.html", "fastOpt"))
+    def generateIndexFastOpt: T[os.Path] = Task(generateIndex("index-fast.html", "fastOpt"))
 
-    def generateIndex(index: String, suffix: String)(implicit ctx: Ctx): os.Path = {
+    def generateIndex(index: String, suffix: String)(implicit ctx: mill.api.TaskCtx): os.Path = {
       val source = ctx.workspace / "js" / "index.html"
-      val target = T.dest / index
+      val target = Task.dest / index
       ctx.log.info(s"Index $source -> $target")
-      os.makeDir.all(T.dest)
+      os.makeDir.all(Task.dest)
       val content = os.read.lines(source).map { line =>
         line.replace("{{target-js}}", s"formulafx-$suffix.js")
       }
@@ -95,11 +93,11 @@ object `package` extends RootModule {
       target
     }
 
-    def bundleFast = T {
+    def bundleFast = Task {
       (fastLinkJS(), generateIndexFastOpt())
     }
 
-    def bundleOpt = T {
+    def bundleOpt = Task {
       (fullLinkJS(), generateIndexOpt())
     }
   }

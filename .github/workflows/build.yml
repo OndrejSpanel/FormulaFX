@@ -18,5 +18,5 @@ jobs:
     - name: Run tests
       run: |
         chmod +x ./mill
-        ./mill shared.jvmTest.test
+        ./mill shared.jvm.test
         
