@@ -76,9 +76,11 @@ object `package` extends Module {
       mvn"org.scala-js::scalajs-dom::2.8.0"
     )
 
-    def generateIndexOpt: T[os.Path] = Task(generateIndex("index.html", "opt"))
+    def indexSource = Task.Source("js")
 
     def generateIndexFastOpt: T[os.Path] = Task(generateIndex("index-fast.html", "fastOpt"))
+
+    def generateIndexOpt: T[os.Path] = Task(generateIndex("index.html", "opt"))
 
     def generateIndex(index: String, suffix: String)(implicit ctx: mill.api.TaskCtx): os.Path = {
       val source = ctx.workspace / "js" / "index.html"
