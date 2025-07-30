@@ -1,4 +1,4 @@
-//| mill-version: 1.0.1
+//| mill-version: 1.0.2
 //| mill-jvm-version: 11
 import mill.*
 import mill.T
