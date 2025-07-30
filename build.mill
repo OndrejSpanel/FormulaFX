@@ -78,11 +78,11 @@ object `package` extends Module {
 
     def indexSource = Task.Source("js")
 
-    def generateIndexFastOpt: T[os.Path] = Task(generateIndex("index-fast.html", "fastOpt"))
+    def generateIndexFastOpt: T[os.Path] = Task(generateIndex(indexSource, "index-fast.html", "fastOpt"))
 
-    def generateIndexOpt: T[os.Path] = Task(generateIndex("index.html", "opt"))
+    def generateIndexOpt: T[os.Path] = Task(generateIndex(indexSource, "index.html", "opt"))
 
-    def generateIndex(index: String, suffix: String)(implicit ctx: mill.api.TaskCtx): os.Path = {
+    def generateIndex(src: Task.Simple[PathRef], index: String, suffix: String)(implicit ctx: mill.api.TaskCtx): os.Path = {
       val source = ctx.workspace / "js" / "index.html"
       val target = Task.dest / index
       ctx.log.info(s"Index $source -> $target")
